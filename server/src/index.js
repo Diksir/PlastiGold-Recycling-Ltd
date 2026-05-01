@@ -20,8 +20,8 @@ await fs.mkdir(dataDir, { recursive: true });
 const app = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@plastigoldrecycling.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@plastigoldrecycling.com').trim();
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'admin123').trim();
 const sessions = new Map();
 
 const defaultContent = {
@@ -141,7 +141,8 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
+  const email = String(req.body.email || '').trim();
+  const password = String(req.body.password || '').trim();
 
   if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
     res.status(401).json({ message: 'Invalid email or password.' });
