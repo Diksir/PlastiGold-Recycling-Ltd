@@ -6,10 +6,6 @@ services:
     rootDir: server
     buildCommand: npm install
     startCommand: npm start
-    disk:
-      name: plastigold-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -19,7 +15,3 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
-      - key: UPLOADS_DIR
-        value: /var/data/uploads
-      - key: DATA_DIR
-        value: /var/data/data
