@@ -77,10 +77,11 @@ const writeContent = async (content) => {
 
 const allowedOrigins = CLIENT_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean);
 const isLocalDevOrigin = (origin) => /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]|192\.168\.\d+\.\d+):5173$/.test(origin);
+const isProductionOrigin = (origin) => /^https:\/\/(www\.)?plastigoldrecycling\.ng$/.test(origin);
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin(origin) || isProductionOrigin(origin)) {
       callback(null, true);
       return;
     }
