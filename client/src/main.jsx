@@ -37,13 +37,13 @@ const defaultContent = {
     tagline: 'Turning Plastic Waste into a Better Future',
   },
   slides: [
-    { id: 'slide-1', title: 'Recycling facility', image: '/assets/recycling-plant.svg' },
-    { id: 'slide-2', title: 'Green recycled pellets', image: '/assets/pellets-green.svg' },
-    { id: 'slide-3', title: 'Clear recycled pellets', image: '/assets/pellets-clear.svg' },
-    { id: 'slide-4', title: 'Collection yard', image: '/assets/gallery-yard.svg' },
-    { id: 'slide-5', title: 'Plastic sorting', image: '/assets/sorting-line.svg' },
-    { id: 'slide-6', title: 'Recycled material supply', image: '/assets/material-bags.svg' },
-    { id: 'slide-7', title: 'Circular production', image: '/assets/circular-future.svg' },
+    { id: 'slide-red-pellets-01', title: 'Red recycled plastic pellets', image: '/assets/slide-red-pellets-01.jpeg' },
+    { id: 'slide-brown-pellets-01', title: 'Brown recycled plastic pellets', image: '/assets/slide-brown-pellets-01.jpeg' },
+    { id: 'slide-dark-pellets-01', title: 'Dark recycled plastic pellets', image: '/assets/slide-dark-pellets-01.jpeg' },
+    { id: 'slide-white-pellets-01', title: 'White recycled plastic pellets', image: '/assets/slide-white-pellets-01.jpeg' },
+    { id: 'slide-dark-pellets-02', title: 'Sorted dark pellets', image: '/assets/slide-dark-pellets-02.jpeg' },
+    { id: 'slide-brown-pellets-02', title: 'Sorted brown pellets', image: '/assets/slide-brown-pellets-02.jpeg' },
+    { id: 'slide-red-pellets-02', title: 'Sorted red pellets', image: '/assets/slide-red-pellets-02.jpeg' },
   ],
   gallery: [
     {
@@ -79,17 +79,17 @@ const products = [
   {
     name: 'HDPE Regrind',
     description: 'Cleaned and processed high-density plastic flakes for manufacturing durable plastic goods.',
-    image: '/assets/pellets-green.svg',
+    image: '/assets/product-brown-pellets.jpeg',
   },
   {
     name: 'PP Pellets',
     description: 'Consistent recycled polypropylene pellets prepared for injection and extrusion applications.',
-    image: '/assets/pellets-clear.svg',
+    image: '/assets/product-white-pellets.jpeg',
   },
   {
     name: 'Mixed Plastic Materials',
     description: 'Sorted recyclable materials ready for industrial partners and circular production pipelines.',
-    image: '/assets/recycling-plant.svg',
+    image: '/assets/product-dark-pellets.jpeg',
   },
 ];
 
