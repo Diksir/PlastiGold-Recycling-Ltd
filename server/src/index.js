@@ -353,4 +353,5 @@ app.use((error, _req, res, _next) => {
 
 app.listen(PORT, () => {
   console.log(`PlastiGold API running on http://localhost:${PORT}`);
+  console.log(`Admin login configured for ${ADMIN_EMAIL} with password length ${ADMIN_PASSWORD.length}`);
 });
