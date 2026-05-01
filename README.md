@@ -81,4 +81,22 @@ npm run build
 
 The production frontend output is generated in `client/dist`.
 
-For deployment, host the Express server separately or configure your platform to serve `client/dist` and proxy API requests to the server.
+## Deployment
+
+Deploy the frontend to Vercel from the repository root. The included `vercel.json` builds `client/` and serves `client/dist`.
+
+Deploy the backend as a Node web service separately, for example on Render with the included `render.yaml`. Set these backend environment variables:
+
+```bash
+CLIENT_ORIGIN=https://your-vercel-site.vercel.app
+ADMIN_EMAIL=admin@plastigoldrecycling.com
+ADMIN_PASSWORD=use-a-strong-password
+UPLOADS_DIR=/var/data/uploads
+DATA_DIR=/var/data/data
+```
+
+After the backend is live, add this frontend environment variable in Vercel and redeploy:
+
+```bash
+VITE_API_BASE_URL=https://your-backend-url.onrender.com
+```

@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
-const uploadsDir = path.join(rootDir, 'uploads');
-const dataDir = path.join(rootDir, 'data');
+const uploadsDir = process.env.UPLOADS_DIR || path.join(rootDir, 'uploads');
+const dataDir = process.env.DATA_DIR || path.join(rootDir, 'data');
 const contentFile = path.join(dataDir, 'content.json');
 
 await fs.mkdir(uploadsDir, { recursive: true });
