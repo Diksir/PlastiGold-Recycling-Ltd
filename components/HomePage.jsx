@@ -119,42 +119,43 @@ export default function HomePage() {
               {error && <p className="mt-4 text-sm font-semibold text-[#4c6f94]">Using saved website placeholders until content loads.</p>}
             </div>
 
-            <div className="relative">
-              <div className="absolute -right-4 -top-4 hidden h-40 w-40 rounded-full bg-[#b8ff12]/70 blur-2xl md:block" />
-              <div className="relative overflow-hidden rounded-[1.75rem] bg-[#f6f8f2] p-3 shadow-[0_32px_80px_rgba(32,43,69,0.14)]">
-                <div className="absolute right-6 top-6 z-10 rounded-full bg-[#b8ff12] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#202b45]">
-                  Recycled materials
-                </div>
-                <div className="relative aspect-[0.95] overflow-hidden rounded-[1.35rem] bg-neutral-100 md:aspect-[1.05]">
-                {slides.map((slide, index) => (
-                  <img
-                    className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
-                    src={slide.image}
-                    alt={slide.title}
-                    key={slide.id || slide.title}
-                  />
-                ))}
-                </div>
-              </div>
-              <div className="mt-5 flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-[0_18px_45px_rgba(32,43,69,0.10)] sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b5d34]">Featured material</p>
-                  <p className="mt-1 font-black text-[#202b45]">{activeImage.title}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {slides.slice(0, 7).map((slide, index) => (
-                      <button
-                        className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#b8ff12]' : 'w-2 bg-[#202b45]/25'}`}
-                        onClick={() => setActiveSlide(index)}
-                        aria-label={`Show ${slide.title}`}
-                        key={`dot-${slide.id || slide.title}`}
-                      />
-                    ))}
+            <div className="relative lg:justify-self-end">
+              <div className="absolute -inset-5 hidden rounded-[2.5rem] bg-[radial-gradient(circle_at_70%_20%,rgba(184,255,18,0.42),transparent_40%)] md:block" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-black/5 bg-white p-2 shadow-[0_32px_90px_rgba(32,43,69,0.16)]">
+                <div className="relative aspect-[4/3] min-h-[360px] overflow-hidden rounded-[1.5rem] bg-[#f7f7f4] md:aspect-[16/11] lg:min-h-[560px]">
+                  {slides.map((slide, index) => (
+                    <img
+                      className={`absolute inset-0 h-full w-full object-contain transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-[1.02] opacity-0'}`}
+                      src={slide.image}
+                      alt={slide.title}
+                      key={slide.id || slide.title}
+                    />
+                  ))}
+                  <div className="absolute right-5 top-5 z-10 rounded-full bg-[#b8ff12] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#202b45] shadow-[0_12px_30px_rgba(17,24,39,0.12)]">
+                    Recycled materials
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
-                    <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
+                  <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#111827]/45 via-[#111827]/12 to-transparent" />
+                  <div className="absolute inset-x-3 bottom-3 z-10 flex flex-col gap-4 rounded-2xl border border-white/40 bg-white/95 p-4 shadow-[0_18px_45px_rgba(17,24,39,0.18)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b5d34]">Featured material</p>
+                      <p className="mt-1 truncate font-black text-[#202b45]">{activeImage.title}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {slides.slice(0, 7).map((slide, index) => (
+                          <button
+                            className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#b8ff12]' : 'w-2 bg-[#202b45]/25'}`}
+                            onClick={() => setActiveSlide(index)}
+                            aria-label={`Show ${slide.title}`}
+                            key={`dot-${slide.id || slide.title}`}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
+                        <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
