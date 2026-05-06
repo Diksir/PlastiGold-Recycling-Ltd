@@ -34,29 +34,39 @@ export const defaultContent = {
   ],
 };
 
-export const products = [
+export const services = [
   {
-    name: 'HDPE Regrind',
-    description: 'Cleaned and processed high-density plastic flakes for manufacturing durable plastic goods.',
+    name: 'Plastic Collection',
+    description: 'Coordinated recovery of recyclable plastic materials from businesses, communities, and industrial partners.',
     image: '/assets/product-brown-pellets.jpeg',
   },
   {
-    name: 'PP Pellets',
-    description: 'Consistent recycled polypropylene pellets prepared for injection and extrusion applications.',
+    name: 'Sorting and Processing',
+    description: 'Material separation, cleaning, and preparation that helps plastic waste return to useful production streams.',
     image: '/assets/product-white-pellets.jpeg',
   },
   {
-    name: 'Mixed Plastic Materials',
-    description: 'Sorted recyclable materials ready for industrial partners and circular production pipelines.',
+    name: 'Recycled Materials Supply',
+    description: 'Reliable regrind, pellets, and mixed plastic materials supplied for manufacturing and circular production.',
     image: '/assets/product-dark-pellets.jpeg',
   },
 ];
 
+export const impactStats = [
+  { value: '250+', label: 'Tons Plastic Recycled', detail: 'Recovered material moved back into productive use.' },
+  { value: '40+', label: 'Jobs Created', detail: 'Local work supported through sorting, handling, and operations.' },
+  { value: '12+', label: 'Communities Served', detail: 'Collection relationships across Kano business and community areas.' },
+];
+
+export const partners = ['Manufacturers', 'Local Collectors', 'Community Groups', 'Industrial Buyers'];
+
 export const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'About Us', href: '#about' },
-  { label: 'Products', href: '#products' },
+  { label: 'Services', href: '#services' },
+  { label: 'Impact', href: '#impact' },
   { label: 'Gallery', href: '#gallery' },
+  { label: 'Partners', href: '#partners' },
   { label: 'Contact', href: '#contact' },
 ];
 
