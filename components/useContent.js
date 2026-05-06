@@ -13,7 +13,7 @@ export default function useContent() {
     setLoading(true);
     setError('');
     try {
-      const data = await apiRequest('/api/content');
+      const data = await apiRequest(`/api/content?ts=${Date.now()}`, { cache: 'no-store' });
       setContent({
         hero: data.hero || defaultContent.hero,
         slides: data.slides?.length ? data.slides : defaultContent.slides,

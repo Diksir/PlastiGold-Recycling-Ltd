@@ -120,14 +120,16 @@ function AdminDashboard({ token, onLogout }) {
     setBusy(true);
     setMessage('');
     try {
-      await task();
+      const result = await task();
       setMessage(successMessage);
       await loadContent();
+      return result;
     } catch (err) {
       setMessage(err.message);
       if (err.message.includes('login')) {
         localStorage.removeItem(tokenKey);
       }
+      return null;
     } finally {
       setBusy(false);
     }
@@ -250,6 +252,13 @@ function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
   const [aboutImage, setAboutImage] = useState(null);
   const [videoPoster, setVideoPoster] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+  const aboutPreviewUrl = useMemo(() => (aboutImage ? URL.createObjectURL(aboutImage) : ''), [aboutImage]);
+  const posterPreviewUrl = useMemo(() => (videoPoster ? URL.createObjectURL(videoPoster) : ''), [videoPoster]);
+  const videoPreviewUrl = useMemo(() => (videoFile ? URL.createObjectURL(videoFile) : ''), [videoFile]);
+
+  useEffect(() => () => aboutPreviewUrl && URL.revokeObjectURL(aboutPreviewUrl), [aboutPreviewUrl]);
+  useEffect(() => () => posterPreviewUrl && URL.revokeObjectURL(posterPreviewUrl), [posterPreviewUrl]);
+  useEffect(() => () => videoPreviewUrl && URL.revokeObjectURL(videoPreviewUrl), [videoPreviewUrl]);
 
   const updateAbout = (key, value) => {
     setStoryDraft((current) => ({
@@ -279,7 +288,8 @@ function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
     if (aboutImage) formData.append('aboutImage', aboutImage);
     if (videoPoster) formData.append('videoPoster', videoPoster);
     if (videoFile) formData.append('videoFile', videoFile);
-    await onSave(formData);
+    const nextStory = await onSave(formData);
+    if (nextStory) setStoryDraft(nextStory);
     setAboutImage(null);
     setVideoPoster(null);
     setVideoFile(null);
@@ -290,7 +300,8 @@ function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
       <div className="grid gap-5 rounded-lg border border-[#9DB36B]/30 bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
         <div className="grid gap-3">
           <h3 className="font-black text-[#5A7C2E]">Image and Write-up</h3>
-          <img className="aspect-[1.38] w-full rounded-lg object-cover" src={storyDraft.about.image} alt={storyDraft.about.title} />
+          <img className="aspect-[1.38] w-full rounded-lg object-cover" src={aboutPreviewUrl || storyDraft.about.image} alt={storyDraft.about.title} />
+          {aboutImage && <p className="text-sm font-black text-[#5A7C2E]">New image selected. Click Save Story Sections to publish it.</p>}
           <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
             <Upload size={20} />
             <span className="min-w-0 truncate">{aboutImage ? aboutImage.name : 'Replace section image'}</span>
@@ -326,13 +337,14 @@ function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
       <div className="grid gap-5 rounded-lg border border-[#9DB36B]/30 bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
         <div className="grid gap-3">
           <h3 className="font-black text-[#5A7C2E]">Story Video</h3>
-          {storyDraft.video.videoUrl ? (
-            <video className="aspect-video w-full rounded-lg object-cover" controls poster={storyDraft.video.poster}>
-              <source src={storyDraft.video.videoUrl} />
+          {videoPreviewUrl || storyDraft.video.videoUrl ? (
+            <video className="aspect-video w-full rounded-lg object-cover" controls poster={posterPreviewUrl || storyDraft.video.poster}>
+              <source src={videoPreviewUrl || storyDraft.video.videoUrl} />
             </video>
           ) : (
-            <img className="aspect-video w-full rounded-lg object-cover" src={storyDraft.video.poster} alt={storyDraft.video.title} />
+            <img className="aspect-video w-full rounded-lg object-cover" src={posterPreviewUrl || storyDraft.video.poster} alt={storyDraft.video.title} />
           )}
+          {(videoPoster || videoFile) && <p className="text-sm font-black text-[#5A7C2E]">New video media selected. Click Save Story Sections to publish it.</p>}
           <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
             <Upload size={20} />
             <span className="min-w-0 truncate">{videoPoster ? videoPoster.name : 'Replace video poster'}</span>
