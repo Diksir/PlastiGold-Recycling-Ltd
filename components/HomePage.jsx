@@ -103,7 +103,19 @@ export default function HomePage() {
       <Navbar />
       <main className="overflow-x-hidden bg-[#F3F9E9] text-[#111827]">
         <section id="home" className={`relative grid min-h-[calc(100vh-73px)] items-end overflow-hidden bg-white ${pageX} py-10 md:items-center md:py-14`}>
-          <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,0.98fr)_minmax(320px,0.72fr)] lg:items-end">
+          <div className="absolute inset-y-0 right-0 hidden w-[48%] lg:block">
+            {slides.map((slide, index) => (
+              <img
+                className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
+                src={slide.image}
+                alt={slide.title}
+                key={slide.id || slide.title}
+              />
+            ))}
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,#ffffff_0%,rgba(255,255,255,0.86)_14%,rgba(255,255,255,0.24)_48%,rgba(255,255,255,0)_100%)]" />
+          </div>
+
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.82fr)] lg:items-end">
             <div className="max-w-3xl py-10">
               <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#7BA717]">Plastic recycling in Kano</p>
               <h1 className="text-[clamp(2.8rem,7vw,6.8rem)] font-black leading-none text-[#111827]">{content.hero.title}</h1>
@@ -117,7 +129,16 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-lg border border-[#9DB36B]/25 bg-[#F3F9E9] p-4 shadow-2xl">
-              <img className="aspect-[1.25] w-full rounded-lg object-cover" src={activeImage.image} alt={activeImage.title} />
+              <div className="relative aspect-[1.25] overflow-hidden rounded-lg">
+                {slides.map((slide, index) => (
+                  <img
+                    className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
+                    src={slide.image}
+                    alt={slide.title}
+                    key={`card-${slide.id || slide.title}`}
+                  />
+                ))}
+              </div>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-widest text-[#7BA717]">Featured material</p>
@@ -127,6 +148,16 @@ export default function HomePage() {
                   <button className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#5A7C2E]" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
                   <button className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#5A7C2E]" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
                 </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                {slides.map((slide, index) => (
+                  <button
+                    className={`h-2.5 rounded-full transition-all ${index === activeSlide ? 'w-8 bg-[#7BA717]' : 'w-2.5 bg-[#9DB36B]/45'}`}
+                    onClick={() => setActiveSlide(index)}
+                    aria-label={`Show ${slide.title}`}
+                    key={`dot-${slide.id || slide.title}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
