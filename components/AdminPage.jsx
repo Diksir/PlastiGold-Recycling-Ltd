@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ImagePlus, LogOut, Save, Trash2, Upload } from 'lucide-react';
+import { ArrowDown, ArrowUp, ImagePlus, LogOut, MapPin, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { apiRequest, authHeaders } from './api';
-import { defaultContent, tokenKey } from './siteData';
+import { defaultContent, googleMapsEmbedForContact, tokenKey } from './siteData';
 import useContent from './useContent';
 
 const buttonBase = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 font-black transition disabled:cursor-not-allowed disabled:opacity-55';
@@ -105,6 +105,7 @@ function AdminDashboard({ token, onLogout }) {
   const { content, loading, error, loadContent, setContent } = useContent();
   const [heroDraft, setHeroDraft] = useState(defaultContent.hero);
   const [storyDraft, setStoryDraft] = useState(defaultContent.story);
+  const [siteDraft, setSiteDraft] = useState(() => pickWebsiteDraft(defaultContent));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -115,6 +116,10 @@ function AdminDashboard({ token, onLogout }) {
   useEffect(() => {
     setStoryDraft(content.story || defaultContent.story);
   }, [content.story]);
+
+  useEffect(() => {
+    setSiteDraft(pickWebsiteDraft(content));
+  }, [content]);
 
   const guarded = async (task, successMessage) => {
     setBusy(true);
@@ -153,6 +158,37 @@ function AdminDashboard({ token, onLogout }) {
     'Story sections saved.',
   );
 
+  const saveWebsiteSections = () => guarded(
+    () => apiRequest('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
+      body: JSON.stringify(siteDraft),
+    }),
+    'Website sections saved.',
+  );
+
+  const uploadMedia = async (file) => {
+    if (!file) return '';
+    setBusy(true);
+    setMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = await apiRequest('/api/media', {
+        method: 'POST',
+        headers: authHeaders(token),
+        body: formData,
+      });
+      setMessage('Media uploaded. Remember to save the section.');
+      return data.url;
+    } catch (err) {
+      setMessage(err.message);
+      return '';
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const moveSlide = async (index, direction) => {
     const next = [...content.slides];
     const target = index + direction;
@@ -188,7 +224,7 @@ function AdminDashboard({ token, onLogout }) {
 
         <div className="my-7">
           <h1 className="text-3xl font-black text-[#5A7C2E] sm:text-4xl">Website Admin</h1>
-          <p className="mt-2 max-w-2xl leading-7 text-brand-muted">Control homepage text, hero slides, slide order, and gallery captions.</p>
+          <p className="mt-2 max-w-2xl leading-7 text-brand-muted">Control homepage text, images, videos, sections, contact details, map location, hero slides, slide order, and gallery captions.</p>
           {loading && <p className="mt-3 font-black text-[#5A7C2E]">Loading admin content...</p>}
           {error && <p className="mt-3 font-black text-red-700">{error}</p>}
           {message && <p className={`mt-3 font-black ${message.includes('failed') || message.includes('required') ? 'text-red-700' : 'text-[#5A7C2E]'}`}>{message}</p>}
@@ -204,10 +240,34 @@ function AdminDashboard({ token, onLogout }) {
               Tagline
               <input className={fieldClass} value={heroDraft.tagline} onChange={(event) => setHeroDraft({ ...heroDraft, tagline: event.target.value })} />
             </label>
+            <label className={`${labelClass} lg:col-span-2`}>
+              Hero paragraph
+              <textarea className={`${fieldClass} min-h-28 resize-y`} value={heroDraft.subtitle} onChange={(event) => setHeroDraft({ ...heroDraft, subtitle: event.target.value })} />
+            </label>
+            <label className={labelClass}>
+              Primary button text
+              <input className={fieldClass} value={heroDraft.primaryCtaText} onChange={(event) => setHeroDraft({ ...heroDraft, primaryCtaText: event.target.value })} />
+            </label>
+            <label className={labelClass}>
+              Primary button link
+              <input className={fieldClass} value={heroDraft.primaryCtaHref} onChange={(event) => setHeroDraft({ ...heroDraft, primaryCtaHref: event.target.value })} />
+            </label>
+            <label className={labelClass}>
+              Secondary button text
+              <input className={fieldClass} value={heroDraft.secondaryCtaText} onChange={(event) => setHeroDraft({ ...heroDraft, secondaryCtaText: event.target.value })} />
+            </label>
+            <label className={labelClass}>
+              Secondary button link
+              <input className={fieldClass} value={heroDraft.secondaryCtaHref} onChange={(event) => setHeroDraft({ ...heroDraft, secondaryCtaHref: event.target.value })} />
+            </label>
             <button className={`${primaryButton} w-full lg:w-auto`} onClick={saveHero} disabled={busy}>
               Save Text <Save size={18} />
             </button>
           </div>
+        </AdminSection>
+
+        <AdminSection title="Website Sections, Contact and Map" copy="Edit the remaining website text, cards, services, CTA, footer, phone, email, address, and Google Map location.">
+          <WebsiteSectionsEditor draft={siteDraft} setDraft={setSiteDraft} onSave={saveWebsiteSections} onUpload={uploadMedia} busy={busy} />
         </AdminSection>
 
         <AdminSection title="Story Sections" copy="Edit the large image and write-up section, plus the follow-our-story video area on the homepage.">
@@ -246,6 +306,290 @@ function AdminSection({ title, copy, children }) {
       {children}
     </section>
   );
+}
+
+function pickWebsiteDraft(content) {
+  return cloneValue({
+    navItems: content.navItems || defaultContent.navItems,
+    heroFeatures: content.heroFeatures || defaultContent.heroFeatures,
+    sections: content.sections || defaultContent.sections,
+    impactStats: content.impactStats || defaultContent.impactStats,
+    services: content.services || defaultContent.services,
+    processSteps: content.processSteps || defaultContent.processSteps,
+    whyCards: content.whyCards || defaultContent.whyCards,
+    cta: content.cta || defaultContent.cta,
+    contact: content.contact || defaultContent.contact,
+    footer: content.footer || defaultContent.footer,
+  });
+}
+
+function cloneValue(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
+  const setGroupField = (group, key, value) => {
+    setDraft((current) => ({ ...current, [group]: { ...current[group], [key]: value } }));
+  };
+
+  const setListItem = (listName, index, key, value) => {
+    setDraft((current) => ({
+      ...current,
+      [listName]: current[listName].map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item)),
+    }));
+  };
+
+  const addListItem = (listName, item) => {
+    setDraft((current) => ({ ...current, [listName]: [...current[listName], item] }));
+  };
+
+  const removeListItem = (listName, index) => {
+    setDraft((current) => ({ ...current, [listName]: current[listName].filter((_, itemIndex) => itemIndex !== index) }));
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('This browser does not support current location.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setDraft((current) => ({
+          ...current,
+          contact: {
+            ...current.contact,
+            latitude: String(position.coords.latitude),
+            longitude: String(position.coords.longitude),
+          },
+        }));
+      },
+      (locationError) => alert(locationError.message || 'Could not get current location.'),
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
+  };
+
+  return (
+    <div className="grid gap-6">
+      <MiniPanel title="Navigation and Hero Feature Text">
+        <EditableList
+          fields={[
+            { key: 'label', label: 'Nav label' },
+            { key: 'href', label: 'Link' },
+          ]}
+          items={draft.navItems}
+          listName="navItems"
+          newItem={{ label: 'New Link', href: '#contact' }}
+          onAdd={addListItem}
+          onRemove={removeListItem}
+          onUpdate={setListItem}
+        />
+        <EditableList
+          fields={[
+            { key: 'title', label: 'Feature title' },
+            { key: 'text', label: 'Feature text' },
+          ]}
+          items={draft.heroFeatures}
+          listName="heroFeatures"
+          newItem={{ title: 'New Feature', text: 'Short text' }}
+          onAdd={addListItem}
+          onRemove={removeListItem}
+          onUpdate={setListItem}
+        />
+      </MiniPanel>
+
+      <MiniPanel title="Section Headings">
+        <div className="grid gap-4 md:grid-cols-2">
+          {Object.entries(draft.sections).map(([key, value]) => (
+            <label className={labelClass} key={key}>
+              {labelFromKey(key)}
+              <textarea className={`${fieldClass} min-h-20 resize-y`} value={value} onChange={(event) => setGroupField('sections', key, event.target.value)} />
+            </label>
+          ))}
+        </div>
+      </MiniPanel>
+
+      <MiniPanel title="Impact Statistics">
+        <EditableList
+          fields={[
+            { key: 'value', label: 'Number' },
+            { key: 'label', label: 'Label' },
+            { key: 'detail', label: 'Detail', multiline: true },
+          ]}
+          items={draft.impactStats}
+          listName="impactStats"
+          newItem={{ value: '0+', label: 'New Stat', detail: 'Short detail.' }}
+          onAdd={addListItem}
+          onRemove={removeListItem}
+          onUpdate={setListItem}
+        />
+      </MiniPanel>
+
+      <MiniPanel title="Services and Service Images">
+        <div className="grid gap-4">
+          {draft.services.map((service, index) => (
+            <div className="grid gap-4 rounded-lg border border-[#9DB36B]/30 bg-white p-4 md:grid-cols-[180px_minmax(0,1fr)_auto]" key={`${service.name}-${index}`}>
+              <MediaUploadField accept="image/*" busy={busy} label="Service image" onChange={(url) => setListItem('services', index, 'image', url)} onUpload={onUpload} value={service.image} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className={labelClass}>
+                  Service name
+                  <input className={fieldClass} value={service.name} onChange={(event) => setListItem('services', index, 'name', event.target.value)} />
+                </label>
+                <label className={labelClass}>
+                  Description
+                  <textarea className={`${fieldClass} min-h-28 resize-y`} value={service.description} onChange={(event) => setListItem('services', index, 'description', event.target.value)} />
+                </label>
+              </div>
+              <button className={`${iconButton} text-red-700`} onClick={() => removeListItem('services', index)} type="button" aria-label="Delete service"><Trash2 size={18} /></button>
+            </div>
+          ))}
+          <button className={`${secondaryButton} w-fit`} onClick={() => addListItem('services', { name: 'New Service', description: 'Describe this service.', image: '/assets/recycling-plant.svg' })} type="button">
+            Add Service <Plus size={18} />
+          </button>
+        </div>
+      </MiniPanel>
+
+      <MiniPanel title="Recycling Process">
+        <EditableList
+          fields={[
+            { key: 'step', label: 'Step' },
+            { key: 'title', label: 'Title' },
+            { key: 'text', label: 'Text', multiline: true },
+          ]}
+          items={draft.processSteps}
+          listName="processSteps"
+          newItem={{ step: String(draft.processSteps.length + 1).padStart(2, '0'), title: 'New Step', text: 'Describe this step.' }}
+          onAdd={addListItem}
+          onRemove={removeListItem}
+          onUpdate={setListItem}
+        />
+      </MiniPanel>
+
+      <MiniPanel title="Why Choose Cards">
+        <EditableList
+          fields={[
+            { key: 'title', label: 'Title' },
+            { key: 'text', label: 'Text', multiline: true },
+          ]}
+          items={draft.whyCards}
+          listName="whyCards"
+          newItem={{ title: 'New Benefit', text: 'Describe this benefit.' }}
+          onAdd={addListItem}
+          onRemove={removeListItem}
+          onUpdate={setListItem}
+        />
+      </MiniPanel>
+
+      <MiniPanel title="CTA, Footer and Contact Details">
+        <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <MediaUploadField accept="image/*" busy={busy} label="CTA background" onChange={(url) => setGroupField('cta', 'image', url)} onUpload={onUpload} value={draft.cta.image} />
+          <div className="grid gap-4 md:grid-cols-2">
+            {['title', 'copy', 'buttonText', 'buttonHref'].map((key) => (
+              <label className={labelClass} key={key}>
+                CTA {labelFromKey(key)}
+                <textarea className={`${fieldClass} min-h-16 resize-y`} value={draft.cta[key]} onChange={(event) => setGroupField('cta', key, event.target.value)} />
+              </label>
+            ))}
+            <label className={labelClass}>
+              Footer description
+              <textarea className={`${fieldClass} min-h-24 resize-y`} value={draft.footer.description} onChange={(event) => setGroupField('footer', 'description', event.target.value)} />
+            </label>
+            <label className={labelClass}>
+              Copyright
+              <input className={fieldClass} value={draft.footer.copyright} onChange={(event) => setGroupField('footer', 'copyright', event.target.value)} />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          {['address', 'city', 'phone', 'secondaryPhone', 'email', 'website', 'whatsapp', 'latitude', 'longitude'].map((key) => (
+            <label className={`${labelClass} ${key === 'address' ? 'md:col-span-2' : ''}`} key={key}>
+              {labelFromKey(key)}
+              <input className={fieldClass} value={draft.contact[key]} onChange={(event) => setGroupField('contact', key, event.target.value)} />
+            </label>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button className={secondaryButton} onClick={useCurrentLocation} type="button">
+            Use Current Location <MapPin size={18} />
+          </button>
+        </div>
+        <iframe className="mt-5 h-72 w-full rounded-lg border-0" title="Admin map preview" src={googleMapsEmbedForContact(draft.contact)} />
+      </MiniPanel>
+
+      <button className={`${primaryButton} w-full sm:w-fit`} onClick={onSave} disabled={busy} type="button">
+        Save Website Sections <Save size={18} />
+      </button>
+    </div>
+  );
+}
+
+function MiniPanel({ children, title }) {
+  return (
+    <section className="rounded-lg border border-[#9DB36B]/30 bg-[#FBFFF6] p-4">
+      <h3 className="mb-4 text-lg font-black text-[#5A7C2E]">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function EditableList({ fields, items, listName, newItem, onAdd, onRemove, onUpdate }) {
+  return (
+    <div className="grid gap-4">
+      {items.map((item, index) => (
+        <div className="grid gap-3 rounded-lg border border-[#9DB36B]/30 bg-white p-4 md:grid-cols-[minmax(0,1fr)_auto]" key={`${listName}-${index}`}>
+          <div className="grid gap-3 md:grid-cols-3">
+            {fields.map((field) => (
+              <label className={labelClass} key={field.key}>
+                {field.label}
+                {field.multiline ? (
+                  <textarea className={`${fieldClass} min-h-24 resize-y`} value={item[field.key]} onChange={(event) => onUpdate(listName, index, field.key, event.target.value)} />
+                ) : (
+                  <input className={fieldClass} value={item[field.key]} onChange={(event) => onUpdate(listName, index, field.key, event.target.value)} />
+                )}
+              </label>
+            ))}
+          </div>
+          <button className={`${iconButton} text-red-700`} onClick={() => onRemove(listName, index)} type="button" aria-label={`Delete ${listName} item`}><Trash2 size={18} /></button>
+        </div>
+      ))}
+      <button className={`${secondaryButton} w-fit`} onClick={() => onAdd(listName, newItem)} type="button">
+        Add Item <Plus size={18} />
+      </button>
+    </div>
+  );
+}
+
+function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
+  const [file, setFile] = useState(null);
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
+
+  useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
+
+  const upload = async () => {
+    const url = await onUpload(file);
+    if (url) {
+      onChange(url);
+      setFile(null);
+    }
+  };
+
+  return (
+    <div className="grid gap-3">
+      <img className="aspect-[1.35] w-full rounded-lg bg-[#E9F3D6] object-cover" src={previewUrl || value || '/assets/recycling-plant.svg'} alt={label} />
+      <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+        <Upload size={20} />
+        <span className="min-w-0 truncate">{file ? file.name : label}</span>
+        <input className="hidden" type="file" accept={accept} onChange={(event) => setFile(event.target.files?.[0] || null)} />
+      </label>
+      <button className={secondaryButton} onClick={upload} type="button" disabled={!file || busy}>
+        Upload Media
+      </button>
+    </div>
+  );
+}
+
+function labelFromKey(key) {
+  return key.replace(/([A-Z])/g, ' $1').replace(/^./, (value) => value.toUpperCase());
 }
 
 function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
