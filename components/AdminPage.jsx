@@ -10,8 +10,10 @@ const buttonBase = 'inline-flex min-h-12 items-center justify-center gap-2 round
 const primaryButton = `${buttonBase} bg-brand-green text-white shadow-[0_16px_34px_rgba(10,91,53,0.22)]`;
 const secondaryButton = `${buttonBase} border border-brand-green/15 bg-white text-brand-green`;
 const iconButton = 'grid h-11 w-11 flex-none place-items-center rounded-full border border-brand-green/15 bg-white text-brand-green disabled:cursor-not-allowed disabled:opacity-55';
-const fieldClass = 'min-h-12 w-full rounded-lg border border-brand-green/15 bg-white px-3 py-3 text-brand-ink outline-none focus:border-brand-green';
-const labelClass = 'grid gap-2 font-black text-brand-green';
+const fieldClass = 'min-h-12 w-full min-w-0 rounded-lg border border-brand-green/15 bg-white px-3 py-3 text-brand-ink outline-none focus:border-brand-green';
+const labelClass = 'grid min-w-0 gap-2 font-black text-brand-green';
+const formGridClass = 'grid w-full min-w-0 gap-4';
+const responsiveFormGridClass = `${formGridClass} md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end`;
 
 export default function AdminPage() {
   const [token, setToken] = useState('');
@@ -66,28 +68,34 @@ function AdminLogin({ onLogin }) {
   };
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[#f8fff5] px-4 py-8">
-      <section className="w-full max-w-md rounded-lg border border-brand-green/15 bg-white p-5 shadow-2xl sm:p-7">
-        <img className="h-16 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
-        <h1 className="mt-5 text-3xl font-black text-brand-green">Admin Login</h1>
-        <p className="mt-2 leading-7 text-brand-muted">Sign in to update homepage slides and gallery content.</p>
-        <form className="mt-6 grid gap-4" onSubmit={submitLogin}>
-          <label className={labelClass}>
-            Email address
-            <input className={fieldClass} value={email} type="email" onChange={(event) => setEmail(event.target.value)} required />
-          </label>
-          <label className={labelClass}>
-            Password
-            <input className={fieldClass} value={password} type="password" onChange={(event) => setPassword(event.target.value)} required />
-          </label>
-          <button className={primaryButton} type="submit" disabled={busy}>
-            Login
-          </button>
-        </form>
-        {message && <p className="mt-4 font-black text-red-700">{message}</p>}
-        <a className={`${secondaryButton} mt-5 w-full`} href="/">
-          Back to Website
-        </a>
+    <main className="grid min-h-screen overflow-x-hidden bg-[#f8fff5] px-4 py-8 sm:px-6 lg:place-items-center lg:px-8">
+      <section className="mx-auto grid w-full max-w-md overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-2xl md:max-w-3xl lg:max-w-5xl lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="bg-brand-soft p-5 sm:p-7 lg:flex lg:flex-col lg:justify-between lg:p-8">
+          <div>
+            <img className="h-16 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+            <h1 className="mt-5 text-3xl font-black text-brand-green sm:text-4xl">Admin Login</h1>
+          </div>
+          <p className="mt-3 max-w-sm leading-7 text-brand-muted lg:mt-10">Sign in to update homepage slides and gallery content.</p>
+        </div>
+        <div className="min-w-0 p-5 sm:p-7 lg:p-8">
+          <form className={formGridClass} onSubmit={submitLogin}>
+            <label className={labelClass}>
+              Email address
+              <input className={fieldClass} value={email} type="email" onChange={(event) => setEmail(event.target.value)} required />
+            </label>
+            <label className={labelClass}>
+              Password
+              <input className={fieldClass} value={password} type="password" onChange={(event) => setPassword(event.target.value)} required />
+            </label>
+            <button className={`${primaryButton} w-full`} type="submit" disabled={busy}>
+              Login
+            </button>
+          </form>
+          {message && <p className="mt-4 font-black text-red-700">{message}</p>}
+          <a className={`${secondaryButton} mt-5 w-full`} href="/">
+            Back to Website
+          </a>
+        </div>
       </section>
     </main>
   );
@@ -146,7 +154,7 @@ function AdminDashboard({ token, onLogout }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8fff5] px-4 py-6 sm:px-6 lg:px-12">
+    <main className="min-h-screen overflow-x-hidden bg-[#f8fff5] px-4 py-6 sm:px-6 lg:px-12">
       <section className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <a href="/">
@@ -171,7 +179,7 @@ function AdminDashboard({ token, onLogout }) {
         </div>
 
         <AdminSection title="Homepage Text" copy="Change the main company title and tagline displayed on the first screen.">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+          <div className={responsiveFormGridClass}>
             <label className={labelClass}>
               Main title
               <input className={fieldClass} value={heroDraft.title} onChange={(event) => setHeroDraft({ ...heroDraft, title: event.target.value })} />
@@ -210,8 +218,8 @@ function AdminDashboard({ token, onLogout }) {
 
 function AdminSection({ title, copy, children }) {
   return (
-    <section className="mb-6 grid gap-5 rounded-lg border border-brand-green/15 bg-white/80 p-4 shadow-sm sm:p-6">
-      <div>
+    <section className="mb-6 grid min-w-0 gap-5 overflow-hidden rounded-lg border border-brand-green/15 bg-white/80 p-4 shadow-sm sm:p-6">
+      <div className="min-w-0">
         <h2 className="text-2xl font-black text-brand-green">{title}</h2>
         <p className="mt-2 leading-7 text-brand-muted">{copy}</p>
       </div>
@@ -242,7 +250,7 @@ function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
   };
 
   return (
-    <form className="grid gap-4 rounded-lg border border-brand-green/15 bg-white p-4 shadow-sm sm:p-6 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end" onSubmit={submitUpload}>
+    <form className="grid min-w-0 gap-4 overflow-hidden rounded-lg border border-brand-green/15 bg-white p-4 shadow-sm sm:p-6 md:grid-cols-2 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end" onSubmit={submitUpload}>
       <div className="flex items-center gap-3 lg:block">
         <ImagePlus className="text-brand-green" size={28} />
         <h3 className="font-black text-brand-green lg:mt-3">{title}</h3>
@@ -257,7 +265,7 @@ function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
           <textarea className={`${fieldClass} min-h-24 resize-y`} value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Text to show below the image" />
         </label>
       )}
-      <div className="grid gap-3">
+      <div className="grid min-w-0 gap-3 md:col-span-2 lg:col-span-1">
         <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-brand-green/35 bg-white px-4 py-3 font-black text-brand-green">
           <Upload size={20} />
           <span className="min-w-0 truncate">{selectedFile ? selectedFile.name : 'Choose an image'}</span>
@@ -280,9 +288,9 @@ function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete 
   }, [slide.title]);
 
   return (
-    <article className="grid overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
+    <article className="grid min-w-0 overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
       <img className="aspect-[1.4] h-full w-full object-cover md:aspect-auto" src={slide.image} alt={slide.title} />
-      <div className="grid gap-4 p-4">
+      <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
           Slide title
           <input className={fieldClass} value={title} onChange={(event) => setTitle(event.target.value)} />
@@ -306,9 +314,9 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
   }, [item.title, item.caption]);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm">
+    <article className="min-w-0 overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm">
       <img className="aspect-[1.25] w-full object-cover" src={item.image} alt={item.title} />
-      <div className="grid gap-4 p-4">
+      <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
           Title
           <input className={fieldClass} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
