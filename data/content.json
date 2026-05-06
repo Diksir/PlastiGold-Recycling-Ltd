@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "title": "PlastiGold Recycling Ltd",
+    "tagline": "Turning Plastic Waste into a Better Future"
+  },
+  "slides": [
+    {
+      "id": "slide-red-pellets-01",
+      "title": "Red recycled plastic pellets",
+      "image": "/assets/slide-red-pellets-01.jpeg"
+    },
+    {
+      "id": "slide-brown-pellets-01",
+      "title": "Brown recycled plastic pellets",
+      "image": "/assets/slide-brown-pellets-01.jpeg"
+    },
+    {
+      "id": "slide-dark-pellets-01",
+      "title": "Dark recycled plastic pellets",
+      "image": "/assets/slide-dark-pellets-01.jpeg"
+    },
+    {
+      "id": "slide-white-pellets-01",
+      "title": "White recycled plastic pellets",
+      "image": "/assets/slide-white-pellets-01.jpeg"
+    },
+    {
+      "id": "slide-dark-pellets-02",
+      "title": "Sorted dark pellets",
+      "image": "/assets/slide-dark-pellets-02.jpeg"
+    },
+    {
+      "id": "slide-brown-pellets-02",
+      "title": "Sorted brown pellets",
+      "image": "/assets/slide-brown-pellets-02.jpeg"
+    },
+    {
+      "id": "slide-red-pellets-02",
+      "title": "Sorted red pellets",
+      "image": "/assets/slide-red-pellets-02.jpeg"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "gallery-1",
+      "title": "Recycling plant",
+      "caption": "PlastiGold recycling operations and materials.",
+      "image": "/assets/recycling-plant.svg"
+    },
+    {
+      "id": "gallery-2",
+      "title": "Product pellets",
+      "caption": "Processed recycled plastic materials for industry.",
+      "image": "/assets/pellets-green.svg"
+    },
+    {
+      "id": "gallery-3",
+      "title": "Collection yard",
+      "caption": "Sorted plastic waste prepared for recycling.",
+      "image": "/assets/gallery-yard.svg"
+    }
+  ]
+}

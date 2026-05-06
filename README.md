@@ -1,77 +1,59 @@
 # PlastiGold Recycling Ltd Website
 
-Modern full-stack website for PlastiGold Recycling Ltd, a plastic recycling company in Kano, Nigeria.
+Modern full-stack Next.js website for PlastiGold Recycling Ltd, a plastic recycling company in Kano, Nigeria.
 
 ## Project Structure
 
 ```text
-client/   React + Vite single-page website and admin image manager
-server/   Node.js + Express API for uploaded images
+app/        Next.js routes, pages, and API handlers
+components/ Reusable React UI for the public site and admin forms
+lib/        Shared content, auth, and upload helpers
+public/     Static assets and uploaded images
+data/       Editable homepage content
 ```
 
 ## Install Dependencies
 
 ```bash
-npm run install:all
 npm install
 ```
 
-## Run Backend
-
-```bash
-npm run dev --prefix server
-```
-
-Backend runs on `http://localhost:5000` by default.
-
-## Run Frontend
-
-```bash
-npm run dev --prefix client
-```
-
-Frontend runs on `http://localhost:5173` by default.
-
-You can also run both together:
+## Run Locally
 
 ```bash
 npm run dev
 ```
 
+Next.js runs the website and API together on `http://localhost:3000`.
+
 ## Environment Variables
 
-Create `client/.env` from `client/.env.example`:
+Create `.env.local` in the project root:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:5000
-```
-
-Create `server/.env` from `server/.env.example`:
-
-```bash
-PORT=5000
-CLIENT_ORIGIN=http://localhost:5173
 ADMIN_EMAIL=admin@plastigoldrecycling.com
 ADMIN_PASSWORD=change-this-password
+UPLOADS_DIR=./public/uploads
+DATA_DIR=./data
 ```
 
 ## Admin Login and Website Editing
 
-1. Start the backend and frontend.
-2. Open `http://localhost:5173/admin`.
-3. Login with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values from `server/.env`.
+1. Start the Next.js app.
+2. Open `http://localhost:3000/admin`.
+3. Login with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values from `.env.local`.
 4. Edit the homepage title/tagline, upload hero slider images, reorder slides, and manage gallery captions.
-5. Uploaded files are stored in `server/uploads`.
-6. Editable website content is stored in `server/data/content.json`.
+5. Uploaded files are stored in `public/uploads`.
+6. Editable website content is stored in `data/content.json`.
 
 Default development credentials are `admin@plastigoldrecycling.com` and `admin123` if environment variables are not set. Change these before using the site publicly.
 
 ## Changing Logo and Images
 
-- Logo: replace `client/public/assets/plastigold-logo.svg`.
-- Product placeholders: replace files in `client/public/assets/`.
+- Logo: replace `public/assets/plastigold-logo.svg`.
+- Product placeholders: replace files in `public/assets/`.
 - Hero slides and uploaded gallery images: manage them from `/admin`.
-- Manual content backup: copy `server/data/content.json` and `server/uploads`.
+- Manual content backup: copy `data/content.json` and `public/uploads`.
 
 ## Production Build
 
@@ -79,24 +61,13 @@ Default development credentials are `admin@plastigoldrecycling.com` and `admin12
 npm run build
 ```
 
-The production frontend output is generated in `client/dist`.
+Next.js builds the website and API routes into `.next`.
 
 ## Deployment
 
-Deploy the frontend to Vercel from the repository root. The included `vercel.json` builds `client/` and serves `client/dist`.
-
-Deploy the backend as a Node web service separately, for example on Render with the included `render.yaml`. Set these backend environment variables:
+Deploy the project to Vercel from the repository root. The included `vercel.json` uses the Next.js build. Set these environment variables:
 
 ```bash
-CLIENT_ORIGIN=https://your-vercel-site.vercel.app
 ADMIN_EMAIL=admin@plastigoldrecycling.com
 ADMIN_PASSWORD=use-a-strong-password
-UPLOADS_DIR=/var/data/uploads
-DATA_DIR=/var/data/data
-```
-
-After the backend is live, add this frontend environment variable in Vercel and redeploy:
-
-```bash
-VITE_API_BASE_URL=https://your-backend-url.onrender.com
 ```

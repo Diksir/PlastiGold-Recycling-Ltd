@@ -1,0 +1,327 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, ImagePlus, LogOut, Save, Trash2, Upload } from 'lucide-react';
+import { apiRequest, authHeaders } from './api';
+import { defaultContent, tokenKey } from './siteData';
+import useContent from './useContent';
+
+const buttonBase = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 font-black transition disabled:cursor-not-allowed disabled:opacity-55';
+const primaryButton = `${buttonBase} bg-brand-green text-white shadow-[0_16px_34px_rgba(10,91,53,0.22)]`;
+const secondaryButton = `${buttonBase} border border-brand-green/15 bg-white text-brand-green`;
+const iconButton = 'grid h-11 w-11 flex-none place-items-center rounded-full border border-brand-green/15 bg-white text-brand-green disabled:cursor-not-allowed disabled:opacity-55';
+const fieldClass = 'min-h-12 w-full rounded-lg border border-brand-green/15 bg-white px-3 py-3 text-brand-ink outline-none focus:border-brand-green';
+const labelClass = 'grid gap-2 font-black text-brand-green';
+
+export default function AdminPage() {
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    setToken(localStorage.getItem(tokenKey) || '');
+  }, []);
+
+  const handleLogin = (newToken) => {
+    localStorage.setItem(tokenKey, newToken);
+    setToken(newToken);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest('/api/auth/logout', {
+        method: 'POST',
+        headers: authHeaders(token),
+      });
+    } catch {
+      // Clearing local auth is still the right recovery if the session expired.
+    }
+    localStorage.removeItem(tokenKey);
+    setToken('');
+  };
+
+  return token ? <AdminDashboard token={token} onLogout={handleLogout} /> : <AdminLogin onLogin={handleLogin} />;
+}
+
+function AdminLogin({ onLogin }) {
+  const [email, setEmail] = useState('admin@plastigoldrecycling.com');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const submitLogin = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setMessage('');
+    try {
+      const data = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      onLogin(data.token);
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className="grid min-h-screen place-items-center bg-[#f8fff5] px-4 py-8">
+      <section className="w-full max-w-md rounded-lg border border-brand-green/15 bg-white p-5 shadow-2xl sm:p-7">
+        <img className="h-16 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+        <h1 className="mt-5 text-3xl font-black text-brand-green">Admin Login</h1>
+        <p className="mt-2 leading-7 text-brand-muted">Sign in to update homepage slides and gallery content.</p>
+        <form className="mt-6 grid gap-4" onSubmit={submitLogin}>
+          <label className={labelClass}>
+            Email address
+            <input className={fieldClass} value={email} type="email" onChange={(event) => setEmail(event.target.value)} required />
+          </label>
+          <label className={labelClass}>
+            Password
+            <input className={fieldClass} value={password} type="password" onChange={(event) => setPassword(event.target.value)} required />
+          </label>
+          <button className={primaryButton} type="submit" disabled={busy}>
+            Login
+          </button>
+        </form>
+        {message && <p className="mt-4 font-black text-red-700">{message}</p>}
+        <a className={`${secondaryButton} mt-5 w-full`} href="/">
+          Back to Website
+        </a>
+      </section>
+    </main>
+  );
+}
+
+function AdminDashboard({ token, onLogout }) {
+  const { content, loading, error, loadContent, setContent } = useContent();
+  const [heroDraft, setHeroDraft] = useState(defaultContent.hero);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setHeroDraft(content.hero);
+  }, [content.hero]);
+
+  const guarded = async (task, successMessage) => {
+    setBusy(true);
+    setMessage('');
+    try {
+      await task();
+      setMessage(successMessage);
+      await loadContent();
+    } catch (err) {
+      setMessage(err.message);
+      if (err.message.includes('login')) {
+        localStorage.removeItem(tokenKey);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveHero = () => guarded(
+    () => apiRequest('/api/content/hero', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
+      body: JSON.stringify(heroDraft),
+    }),
+    'Homepage text saved.',
+  );
+
+  const moveSlide = async (index, direction) => {
+    const next = [...content.slides];
+    const target = index + direction;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setContent((current) => ({ ...current, slides: next }));
+    await guarded(
+      () => apiRequest('/api/slides/order', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
+        body: JSON.stringify({ ids: next.map((slide) => slide.id) }),
+      }),
+      'Slide order saved.',
+    );
+  };
+
+  return (
+    <main className="min-h-screen bg-[#f8fff5] px-4 py-6 sm:px-6 lg:px-12">
+      <section className="mx-auto w-full max-w-7xl">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <a href="/">
+            <img className="h-14 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+          </a>
+          <div className="grid gap-3 sm:flex sm:items-center">
+            <a className={secondaryButton} href="/">
+              View Website
+            </a>
+            <button className={primaryButton} onClick={onLogout}>
+              Logout <LogOut size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="my-7">
+          <h1 className="text-3xl font-black text-brand-green sm:text-4xl">Website Admin</h1>
+          <p className="mt-2 max-w-2xl leading-7 text-brand-muted">Control homepage text, hero slides, slide order, and gallery captions.</p>
+          {loading && <p className="mt-3 font-black text-brand-green">Loading admin content...</p>}
+          {error && <p className="mt-3 font-black text-red-700">{error}</p>}
+          {message && <p className={`mt-3 font-black ${message.includes('failed') || message.includes('required') ? 'text-red-700' : 'text-brand-green'}`}>{message}</p>}
+        </div>
+
+        <AdminSection title="Homepage Text" copy="Change the main company title and tagline displayed on the first screen.">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+            <label className={labelClass}>
+              Main title
+              <input className={fieldClass} value={heroDraft.title} onChange={(event) => setHeroDraft({ ...heroDraft, title: event.target.value })} />
+            </label>
+            <label className={labelClass}>
+              Tagline
+              <input className={fieldClass} value={heroDraft.tagline} onChange={(event) => setHeroDraft({ ...heroDraft, tagline: event.target.value })} />
+            </label>
+            <button className={`${primaryButton} w-full lg:w-auto`} onClick={saveHero} disabled={busy}>
+              Save Text <Save size={18} />
+            </button>
+          </div>
+        </AdminSection>
+
+        <AdminSection title="Hero Slides" copy="Upload, delete, rename, and rearrange the images used in the top homepage slider.">
+          <UploadPanel title="Add Slide" buttonText="Upload Slide" onUpload={(formData) => guarded(() => apiRequest('/api/slides', { method: 'POST', headers: authHeaders(token), body: formData }), 'Slide uploaded.')} />
+          <div className="grid gap-4">
+            {content.slides.map((slide, index) => (
+              <SlideAdminItem key={slide.id} slide={slide} index={index} total={content.slides.length} busy={busy} onMove={moveSlide} onRename={(title) => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders(token) }, body: JSON.stringify({ title }) }), 'Slide title saved.')} onDelete={() => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Slide deleted.')} />
+            ))}
+          </div>
+        </AdminSection>
+
+        <AdminSection title="Gallery Images" copy="Add images for the gallery and write the text that appears below each image.">
+          <UploadPanel title="Add Gallery Image" buttonText="Upload Gallery Image" includeCaption onUpload={(formData) => guarded(() => apiRequest('/api/gallery', { method: 'POST', headers: authHeaders(token), body: formData }), 'Gallery image uploaded.')} />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {content.gallery.map((item) => (
+              <GalleryAdminItem key={item.id} item={item} busy={busy} onSave={(draft) => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders(token) }, body: JSON.stringify(draft) }), 'Gallery text saved.')} onDelete={() => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Gallery image deleted.')} />
+            ))}
+          </div>
+        </AdminSection>
+      </section>
+    </main>
+  );
+}
+
+function AdminSection({ title, copy, children }) {
+  return (
+    <section className="mb-6 grid gap-5 rounded-lg border border-brand-green/15 bg-white/80 p-4 shadow-sm sm:p-6">
+      <div>
+        <h2 className="text-2xl font-black text-brand-green">{title}</h2>
+        <p className="mt-2 leading-7 text-brand-muted">{copy}</p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [titleText, setTitleText] = useState('');
+  const [caption, setCaption] = useState('');
+  const previewUrl = useMemo(() => (selectedFile ? URL.createObjectURL(selectedFile) : ''), [selectedFile]);
+
+  useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
+
+  const submitUpload = async (event) => {
+    event.preventDefault();
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+    formData.append('title', titleText || selectedFile.name);
+    if (includeCaption) formData.append('caption', caption);
+    await onUpload(formData);
+    setSelectedFile(null);
+    setTitleText('');
+    setCaption('');
+  };
+
+  return (
+    <form className="grid gap-4 rounded-lg border border-brand-green/15 bg-white p-4 shadow-sm sm:p-6 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end" onSubmit={submitUpload}>
+      <div className="flex items-center gap-3 lg:block">
+        <ImagePlus className="text-brand-green" size={28} />
+        <h3 className="font-black text-brand-green lg:mt-3">{title}</h3>
+      </div>
+      <label className={labelClass}>
+        Title
+        <input className={fieldClass} value={titleText} onChange={(event) => setTitleText(event.target.value)} placeholder="Image title" />
+      </label>
+      {includeCaption && (
+        <label className={`${labelClass} lg:col-span-1`}>
+          Caption
+          <textarea className={`${fieldClass} min-h-24 resize-y`} value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Text to show below the image" />
+        </label>
+      )}
+      <div className="grid gap-3">
+        <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-brand-green/35 bg-white px-4 py-3 font-black text-brand-green">
+          <Upload size={20} />
+          <span className="min-w-0 truncate">{selectedFile ? selectedFile.name : 'Choose an image'}</span>
+          <input className="hidden" type="file" accept="image/*" onChange={(event) => setSelectedFile(event.target.files?.[0] || null)} />
+        </label>
+        <button className={`${primaryButton} w-full`} type="submit" disabled={!selectedFile}>
+          {buttonText}
+        </button>
+      </div>
+      {previewUrl && <img className="aspect-[1.35] w-full rounded-lg object-cover lg:col-span-full" src={previewUrl} alt="Selected preview" />}
+    </form>
+  );
+}
+
+function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete }) {
+  const [title, setTitle] = useState(slide.title);
+
+  useEffect(() => {
+    setTitle(slide.title);
+  }, [slide.title]);
+
+  return (
+    <article className="grid overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
+      <img className="aspect-[1.4] h-full w-full object-cover md:aspect-auto" src={slide.image} alt={slide.title} />
+      <div className="grid gap-4 p-4">
+        <label className={labelClass}>
+          Slide title
+          <input className={fieldClass} value={title} onChange={(event) => setTitle(event.target.value)} />
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className={iconButton} disabled={busy || index === 0} onClick={() => onMove(index, -1)} aria-label="Move slide up"><ArrowUp size={18} /></button>
+          <button className={iconButton} disabled={busy || index === total - 1} onClick={() => onMove(index, 1)} aria-label="Move slide down"><ArrowDown size={18} /></button>
+          <button className={`${secondaryButton} flex-1 sm:flex-none`} disabled={busy} onClick={() => onRename(title)}>Save</button>
+          <button className={`${iconButton} text-red-700`} disabled={busy || total <= 1} onClick={onDelete} aria-label="Delete slide"><Trash2 size={18} /></button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function GalleryAdminItem({ item, busy, onSave, onDelete }) {
+  const [draft, setDraft] = useState({ title: item.title, caption: item.caption || '' });
+
+  useEffect(() => {
+    setDraft({ title: item.title, caption: item.caption || '' });
+  }, [item.title, item.caption]);
+
+  return (
+    <article className="overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm">
+      <img className="aspect-[1.25] w-full object-cover" src={item.image} alt={item.title} />
+      <div className="grid gap-4 p-4">
+        <label className={labelClass}>
+          Title
+          <input className={fieldClass} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} />
+        </label>
+        <label className={labelClass}>
+          Caption
+          <textarea className={`${fieldClass} min-h-24 resize-y`} value={draft.caption} onChange={(event) => setDraft({ ...draft, caption: event.target.value })} />
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className={`${secondaryButton} flex-1`} disabled={busy} onClick={() => onSave(draft)}>Save Text</button>
+          <button className={`${iconButton} text-red-700`} disabled={busy} onClick={onDelete} aria-label="Delete gallery image"><Trash2 size={18} /></button>
+        </div>
+      </div>
+    </article>
+  );
+}
