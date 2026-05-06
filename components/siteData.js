@@ -37,12 +37,12 @@ export const defaultContent = {
 export const services = [
   {
     name: 'Plastic Collection',
-    description: 'Coordinated recovery of recyclable plastic materials from businesses, communities, and industrial partners.',
+    description: 'Coordinated recovery of recyclable plastic materials from businesses, communities, and industrial partners across Kano.',
     image: '/assets/product-brown-pellets.jpeg',
   },
   {
     name: 'Sorting and Processing',
-    description: 'Material separation, cleaning, and preparation that helps plastic waste return to useful production streams.',
+    description: 'Disciplined material separation, cleaning, and preparation that helps plastic waste return to useful production streams.',
     image: '/assets/product-white-pellets.jpeg',
   },
   {
@@ -53,18 +53,42 @@ export const services = [
 ];
 
 export const impactStats = [
-  { value: '250+', label: 'Tons Plastic Recycled', detail: 'Recovered material moved back into productive use.' },
+  { value: '250+', label: 'Plastic Recycled', detail: 'Tons of material moved back into productive use.' },
   { value: '40+', label: 'Jobs Created', detail: 'Local work supported through sorting, handling, and operations.' },
   { value: '12+', label: 'Communities Served', detail: 'Collection relationships across Kano business and community areas.' },
 ];
 
 export const partners = ['Manufacturers', 'Local Collectors', 'Community Groups', 'Industrial Buyers'];
 
+export const processSteps = [
+  {
+    step: '01',
+    title: 'Recover',
+    text: 'Plastic materials are collected through local relationships with businesses, collectors, and communities.',
+  },
+  {
+    step: '02',
+    title: 'Sort',
+    text: 'Materials are separated by type, quality, and production readiness to reduce contamination.',
+  },
+  {
+    step: '03',
+    title: 'Process',
+    text: 'Recovered plastic is prepared into usable recycled material streams for industrial partners.',
+  },
+  {
+    step: '04',
+    title: 'Supply',
+    text: 'Manufacturers receive consistent recycled inputs that support circular production and cleaner value chains.',
+  },
+];
+
 export const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'About Us', href: '#about' },
   { label: 'Services', href: '#services' },
   { label: 'Impact', href: '#impact' },
+  { label: 'Process', href: '#process' },
   { label: 'Gallery', href: '#gallery' },
   { label: 'Partners', href: '#partners' },
   { label: 'Contact', href: '#contact' },
