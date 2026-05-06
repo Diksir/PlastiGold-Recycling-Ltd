@@ -264,29 +264,20 @@ function AboutSection({ story }) {
     <section id="about" className={`${sectionCard} ${sectionPad} grid gap-10 md:items-center lg:grid-cols-[0.9fr_1.1fr]`}>
       <img className="aspect-[1.08] w-full rounded-lg object-cover" src={story.about.image} alt={story.about.title} loading="lazy" decoding="async" />
       <div>
-        <h2 className="text-[clamp(2rem,3.2vw,3.5rem)] font-black leading-tight text-[#0e2118]">About PlastiGold Recycling Ltd.</h2>
-        <Paragraphs className="mt-4 text-sm leading-7 text-[#334439]" text={story.about.body} limit={1} />
-        <div className="mt-6 grid gap-4">
-          <ValueLine title="Environmental Responsibility" text="We promote practices that reduce pollution and protect cleaner communities." />
-          <ValueLine title="Community Empowerment" text="We create work opportunities through recycling and local collection initiatives." />
-          <ValueLine title="Circular Economy" text="We turn recovered plastic into reusable materials that support production." />
+        {story.about.eyebrow && <p className="mb-4 text-sm font-black uppercase tracking-[0.16em] text-[#1f7f37]">{story.about.eyebrow}</p>}
+        <h2 className="text-[clamp(2rem,3.2vw,3.5rem)] font-black leading-tight text-[#0e2118]">
+          <StoryTitle title={story.about.title} highlight={story.about.highlight} />
+        </h2>
+        <div className="mt-4 grid gap-3">
+          <Paragraphs className="text-sm leading-7 text-[#334439]" text={story.about.body} />
         </div>
+        {story.about.quote && (
+          <blockquote className="mt-6 border-l-4 border-[#c9a34a] bg-[#f8faf4] px-5 py-4 text-sm font-bold leading-7 text-[#334439]">
+            {story.about.quote}
+          </blockquote>
+        )}
       </div>
     </section>
-  );
-}
-
-function ValueLine({ title, text }) {
-  return (
-    <div className="flex gap-3">
-      <span className="mt-1 grid h-8 w-8 flex-none place-items-center rounded-full bg-[#e7f4e6] text-[#1f7f37]">
-        <CheckCircle2 size={16} />
-      </span>
-      <div>
-        <strong className="text-sm text-[#0e2118]">{title}</strong>
-        <p className="mt-1 text-sm leading-6 text-[#4f5f55]">{text}</p>
-      </div>
-    </div>
   );
 }
 
@@ -434,7 +425,7 @@ function Footer() {
         </div>
       </div>
       <div className="mt-10 border-t border-white/10 pt-6 text-sm text-white/50">
-        © 2026 PlastiGold Recycling Ltd. All Rights Reserved.
+        Copyright 2026 PlastiGold Recycling Ltd. All Rights Reserved.
       </div>
     </footer>
   );
@@ -474,6 +465,25 @@ function CenteredTitle({ copy, dark = false, icon: Icon, title }) {
       <span className="mx-auto mt-3 block h-0.5 w-12 bg-[#c9a34a]" />
       {copy && <p className={`mx-auto mt-4 max-w-xl text-sm leading-7 ${dark ? 'text-white/70' : 'text-[#5d6a61]'}`}>{copy}</p>}
     </div>
+  );
+}
+
+function StoryTitle({ highlight, title }) {
+  if (!highlight || !title?.toLowerCase().includes(highlight.toLowerCase())) {
+    return title;
+  }
+
+  const start = title.toLowerCase().indexOf(highlight.toLowerCase());
+  const before = title.slice(0, start);
+  const match = title.slice(start, start + highlight.length);
+  const after = title.slice(start + highlight.length);
+
+  return (
+    <>
+      {before}
+      <span className="text-[#69a94d]">{match}</span>
+      {after}
+    </>
   );
 }
 
