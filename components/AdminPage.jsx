@@ -7,11 +7,11 @@ import { defaultContent, tokenKey } from './siteData';
 import useContent from './useContent';
 
 const buttonBase = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 font-black transition disabled:cursor-not-allowed disabled:opacity-55';
-const primaryButton = `${buttonBase} bg-brand-green text-white shadow-[0_16px_34px_rgba(10,91,53,0.22)]`;
-const secondaryButton = `${buttonBase} border border-brand-green/15 bg-white text-brand-green`;
-const iconButton = 'grid h-11 w-11 flex-none place-items-center rounded-full border border-brand-green/15 bg-white text-brand-green disabled:cursor-not-allowed disabled:opacity-55';
-const fieldClass = 'min-h-12 w-full min-w-0 rounded-lg border border-brand-green/15 bg-white px-3 py-3 text-brand-ink outline-none focus:border-brand-green';
-const labelClass = 'grid min-w-0 gap-2 font-black text-brand-green';
+const primaryButton = `${buttonBase} bg-[#7BA717] text-white shadow-[0_14px_30px_rgba(123,167,23,0.24)] hover:bg-[#6a8f13]`;
+const secondaryButton = `${buttonBase} border border-[#9DB36B]/35 bg-white text-[#5A7C2E] hover:bg-[#F0F9E3]`;
+const iconButton = 'grid h-11 w-11 flex-none place-items-center rounded-full border border-[#9DB36B]/35 bg-white text-[#5A7C2E] disabled:cursor-not-allowed disabled:opacity-55';
+const fieldClass = 'min-h-12 w-full min-w-0 rounded-lg border border-[#9DB36B]/35 bg-white px-3 py-3 text-brand-ink outline-none transition focus:border-[#7BA717] focus:ring-2 focus:ring-[#9DB36B]/30';
+const labelClass = 'grid min-w-0 gap-2 font-black text-[#5A7C2E]';
 const formGridClass = 'grid w-full min-w-0 gap-4';
 const responsiveFormGridClass = `${formGridClass} md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end`;
 
@@ -68,12 +68,12 @@ function AdminLogin({ onLogin }) {
   };
 
   return (
-    <main className="grid min-h-screen overflow-x-hidden bg-[#f8fff5] px-4 py-8 sm:px-6 lg:place-items-center lg:px-8">
-      <section className="mx-auto grid w-full max-w-md overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-2xl md:max-w-3xl lg:max-w-5xl lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="bg-brand-soft p-5 sm:p-7 lg:flex lg:flex-col lg:justify-between lg:p-8">
+    <main className="grid min-h-screen overflow-x-hidden bg-[#F3F9E9] px-4 py-8 sm:px-6 lg:place-items-center lg:px-8">
+      <section className="mx-auto grid w-full max-w-md overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-2xl md:max-w-3xl lg:max-w-5xl lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="bg-[#E9F3D6] p-5 sm:p-7 lg:flex lg:flex-col lg:justify-between lg:p-8">
           <div>
             <img className="h-16 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
-            <h1 className="mt-5 text-3xl font-black text-brand-green sm:text-4xl">Admin Login</h1>
+            <h1 className="mt-5 text-3xl font-black text-[#5A7C2E] sm:text-4xl">Admin Login</h1>
           </div>
           <p className="mt-3 max-w-sm leading-7 text-brand-muted lg:mt-10">Sign in to update homepage slides and gallery content.</p>
         </div>
@@ -154,7 +154,7 @@ function AdminDashboard({ token, onLogout }) {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f8fff5] px-4 py-6 sm:px-6 lg:px-12">
+    <main className="min-h-screen overflow-x-hidden bg-[#F3F9E9] px-4 py-6 sm:px-6 lg:px-12">
       <section className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <a href="/">
@@ -171,11 +171,11 @@ function AdminDashboard({ token, onLogout }) {
         </div>
 
         <div className="my-7">
-          <h1 className="text-3xl font-black text-brand-green sm:text-4xl">Website Admin</h1>
+          <h1 className="text-3xl font-black text-[#5A7C2E] sm:text-4xl">Website Admin</h1>
           <p className="mt-2 max-w-2xl leading-7 text-brand-muted">Control homepage text, hero slides, slide order, and gallery captions.</p>
-          {loading && <p className="mt-3 font-black text-brand-green">Loading admin content...</p>}
+          {loading && <p className="mt-3 font-black text-[#5A7C2E]">Loading admin content...</p>}
           {error && <p className="mt-3 font-black text-red-700">{error}</p>}
-          {message && <p className={`mt-3 font-black ${message.includes('failed') || message.includes('required') ? 'text-red-700' : 'text-brand-green'}`}>{message}</p>}
+          {message && <p className={`mt-3 font-black ${message.includes('failed') || message.includes('required') ? 'text-red-700' : 'text-[#5A7C2E]'}`}>{message}</p>}
         </div>
 
         <AdminSection title="Homepage Text" copy="Change the main company title and tagline displayed on the first screen.">
@@ -218,9 +218,9 @@ function AdminDashboard({ token, onLogout }) {
 
 function AdminSection({ title, copy, children }) {
   return (
-    <section className="mb-6 grid min-w-0 gap-5 overflow-hidden rounded-lg border border-brand-green/15 bg-white/80 p-4 shadow-sm sm:p-6">
+    <section className="mb-6 grid min-w-0 gap-5 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white/90 p-4 shadow-sm sm:p-6">
       <div className="min-w-0">
-        <h2 className="text-2xl font-black text-brand-green">{title}</h2>
+        <h2 className="text-2xl font-black text-[#5A7C2E]">{title}</h2>
         <p className="mt-2 leading-7 text-brand-muted">{copy}</p>
       </div>
       {children}
@@ -250,10 +250,10 @@ function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
   };
 
   return (
-    <form className="grid min-w-0 gap-4 overflow-hidden rounded-lg border border-brand-green/15 bg-white p-4 shadow-sm sm:p-6 md:grid-cols-2 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end" onSubmit={submitUpload}>
+    <form className="grid min-w-0 gap-4 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white p-4 shadow-sm sm:p-6 md:grid-cols-2 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end" onSubmit={submitUpload}>
       <div className="flex items-center gap-3 lg:block">
-        <ImagePlus className="text-brand-green" size={28} />
-        <h3 className="font-black text-brand-green lg:mt-3">{title}</h3>
+        <ImagePlus className="text-[#7BA717]" size={28} />
+        <h3 className="font-black text-[#5A7C2E] lg:mt-3">{title}</h3>
       </div>
       <label className={labelClass}>
         Title
@@ -266,7 +266,7 @@ function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
         </label>
       )}
       <div className="grid min-w-0 gap-3 md:col-span-2 lg:col-span-1">
-        <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-brand-green/35 bg-white px-4 py-3 font-black text-brand-green">
+        <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
           <Upload size={20} />
           <span className="min-w-0 truncate">{selectedFile ? selectedFile.name : 'Choose an image'}</span>
           <input className="hidden" type="file" accept="image/*" onChange={(event) => setSelectedFile(event.target.files?.[0] || null)} />
@@ -288,7 +288,7 @@ function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete 
   }, [slide.title]);
 
   return (
-    <article className="grid min-w-0 overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
+    <article className="grid min-w-0 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
       <img className="aspect-[1.4] h-full w-full object-cover md:aspect-auto" src={slide.image} alt={slide.title} />
       <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
@@ -314,7 +314,7 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
   }, [item.title, item.caption]);
 
   return (
-    <article className="min-w-0 overflow-hidden rounded-lg border border-brand-green/15 bg-white shadow-sm">
+    <article className="min-w-0 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-sm">
       <img className="aspect-[1.25] w-full object-cover" src={item.image} alt={item.title} />
       <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
