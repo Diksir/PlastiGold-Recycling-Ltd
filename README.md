@@ -42,7 +42,7 @@ DATA_DIR=./data
 1. Start the Next.js app.
 2. Open `http://localhost:3000/admin`.
 3. Login with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values from `.env.local`.
-4. Edit the homepage title/tagline, upload hero slider images, reorder slides, and manage gallery captions.
+4. Edit the homepage title/tagline, upload hero slider images, reorder slides, edit the story write-up/image/video section, and manage gallery captions.
 5. Uploaded files are stored in `public/uploads`.
 6. Editable website content is stored in `data/content.json`.
 
@@ -52,7 +52,7 @@ Default development credentials are `admin@plastigoldrecycling.com` and `admin12
 
 - Logo: replace `public/assets/plastigold-logo.svg`.
 - Product placeholders: replace files in `public/assets/`.
-- Hero slides and uploaded gallery images: manage them from `/admin`.
+- Hero slides, story section media, videos, and uploaded gallery images: manage them from `/admin`.
 - Manual content backup: copy `data/content.json` and `public/uploads`.
 
 ## Production Build

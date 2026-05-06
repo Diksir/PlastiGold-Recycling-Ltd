@@ -70,6 +70,7 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const slides = content.slides.length ? content.slides : defaultContent.slides;
   const galleryImages = content.gallery.length ? content.gallery : defaultContent.gallery;
+  const story = content.story || defaultContent.story;
   const activeImage = slides[activeSlide] || slides[0];
 
   useEffect(() => {
@@ -161,21 +162,42 @@ export default function HomePage() {
         </section>
 
         <section id="about" className={`${pageX} ${sectionY} bg-white`}>
-          <div className={`${container} grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center`}>
-            <div>
-              <SectionKicker>About PlastiGold</SectionKicker>
-              <h2 className="mt-4 max-w-3xl text-[clamp(2.25rem,4.5vw,4.8rem)] font-black leading-[0.96] tracking-tight">Industrial recycling with discipline, transparency, and measurable value.</h2>
+          <div className={`${container} grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start`}>
+            <img className="aspect-[1.38] w-full rounded-[1.35rem] object-cover" src={story.about.image} alt={story.about.title} />
+            <div className="pt-2">
+              <SectionKicker>{story.about.eyebrow}</SectionKicker>
+              <h2 className="mt-4 max-w-3xl text-[clamp(2.25rem,4.5vw,4.8rem)] font-black leading-[0.96] tracking-tight">
+                <HighlightedTitle title={story.about.title} highlight={story.about.highlight} />
+              </h2>
+              <Paragraphs className="mt-6 text-lg leading-8 text-[#4b5563]" text={story.about.body} />
+              {story.about.quote && (
+                <blockquote className="mt-7 border-l-4 border-[#b8ff12] pl-5 italic leading-8 text-[#4c6f94]">
+                  {story.about.quote}
+                </blockquote>
+              )}
             </div>
-            <div>
-              <p className="text-lg leading-8 text-[#4b5563]">PlastiGold Recycling Ltd collects, sorts, processes, and supplies recycled plastic materials from Kano. The company exists to turn plastic waste into dependable production input while supporting cleaner communities and local work.</p>
-              <div className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2">
-                {['Community collection networks', 'Material quality discipline', 'Manufacturing-ready supply', 'Cleaner circular production'].map((item) => (
-                  <div className="flex items-center gap-3 font-bold text-[#111827]" key={item}>
-                    <CheckCircle2 className="text-[#0b5d34]" size={20} />
-                    <span>{item}</span>
+          </div>
+        </section>
+
+        <section className={`${pageX} bg-white pb-20 md:pb-28`}>
+          <div className={container}>
+            <h2 className="text-center text-[clamp(1.8rem,3vw,2.6rem)] font-black text-[#202b45]">{story.video.title}</h2>
+            {story.video.caption && <p className="mx-auto mt-4 max-w-2xl text-center leading-8 text-[#4b5563]">{story.video.caption}</p>}
+            <div className="relative mx-auto mt-10 max-w-6xl overflow-hidden rounded-[1.35rem] bg-neutral-100 shadow-[0_24px_70px_rgba(32,43,69,0.12)]">
+              {story.video.videoUrl ? (
+                <video className="aspect-video w-full object-cover" controls poster={story.video.poster}>
+                  <source src={story.video.videoUrl} />
+                </video>
+              ) : (
+                <>
+                  <img className="aspect-video w-full object-cover" src={story.video.poster} alt={story.video.title} />
+                  <div className="absolute inset-0 grid place-items-center bg-black/10">
+                    <span className="grid h-20 w-20 place-items-center rounded-full border-2 border-white bg-black/20 text-white backdrop-blur-sm">
+                      <ArrowRight size={32} />
+                    </span>
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -329,6 +351,36 @@ function ServiceRow({ service, index }) {
       </a>
     </article>
   );
+}
+
+function HighlightedTitle({ title, highlight }) {
+  if (!highlight || !title.toLowerCase().includes(highlight.toLowerCase())) {
+    return title;
+  }
+
+  const start = title.toLowerCase().indexOf(highlight.toLowerCase());
+  const before = title.slice(0, start);
+  const match = title.slice(start, start + highlight.length);
+  const after = title.slice(start + highlight.length);
+
+  return (
+    <>
+      {before}
+      <span className="bg-[linear-gradient(90deg,#fff9af_0%,#b8ff12_82%)] bg-clip-text text-transparent">{match}</span>
+      {after}
+    </>
+  );
+}
+
+function Paragraphs({ text, className }) {
+  return String(text || '')
+    .split('\n')
+    .filter(Boolean)
+    .map((paragraph) => (
+      <p className={className} key={paragraph}>
+        {paragraph}
+      </p>
+    ));
 }
 
 function SectionKicker({ children, dark = false }) {

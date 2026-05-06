@@ -18,6 +18,10 @@ export default function useContent() {
         hero: data.hero || defaultContent.hero,
         slides: data.slides?.length ? data.slides : defaultContent.slides,
         gallery: data.gallery?.length ? data.gallery : defaultContent.gallery,
+        story: {
+          about: { ...defaultContent.story.about, ...(data.story?.about || {}) },
+          video: { ...defaultContent.story.video, ...(data.story?.video || {}) },
+        },
       });
     } catch (err) {
       setError(err.message);

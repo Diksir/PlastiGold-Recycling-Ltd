@@ -104,12 +104,17 @@ function AdminLogin({ onLogin }) {
 function AdminDashboard({ token, onLogout }) {
   const { content, loading, error, loadContent, setContent } = useContent();
   const [heroDraft, setHeroDraft] = useState(defaultContent.hero);
+  const [storyDraft, setStoryDraft] = useState(defaultContent.story);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     setHeroDraft(content.hero);
   }, [content.hero]);
+
+  useEffect(() => {
+    setStoryDraft(content.story || defaultContent.story);
+  }, [content.story]);
 
   const guarded = async (task, successMessage) => {
     setBusy(true);
@@ -135,6 +140,15 @@ function AdminDashboard({ token, onLogout }) {
       body: JSON.stringify(heroDraft),
     }),
     'Homepage text saved.',
+  );
+
+  const saveStory = (formData) => guarded(
+    () => apiRequest('/api/content/story', {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: formData,
+    }),
+    'Story sections saved.',
   );
 
   const moveSlide = async (index, direction) => {
@@ -194,6 +208,10 @@ function AdminDashboard({ token, onLogout }) {
           </div>
         </AdminSection>
 
+        <AdminSection title="Story Sections" copy="Edit the large image and write-up section, plus the follow-our-story video area on the homepage.">
+          <StorySectionEditor storyDraft={storyDraft} setStoryDraft={setStoryDraft} onSave={saveStory} busy={busy} />
+        </AdminSection>
+
         <AdminSection title="Hero Slides" copy="Upload, delete, rename, and rearrange the images used in the top homepage slider.">
           <UploadPanel title="Add Slide" buttonText="Upload Slide" onUpload={(formData) => guarded(() => apiRequest('/api/slides', { method: 'POST', headers: authHeaders(token), body: formData }), 'Slide uploaded.')} />
           <div className="grid gap-4">
@@ -225,6 +243,127 @@ function AdminSection({ title, copy, children }) {
       </div>
       {children}
     </section>
+  );
+}
+
+function StorySectionEditor({ storyDraft, setStoryDraft, onSave, busy }) {
+  const [aboutImage, setAboutImage] = useState(null);
+  const [videoPoster, setVideoPoster] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+
+  const updateAbout = (key, value) => {
+    setStoryDraft((current) => ({
+      ...current,
+      about: { ...current.about, [key]: value },
+    }));
+  };
+
+  const updateVideo = (key, value) => {
+    setStoryDraft((current) => ({
+      ...current,
+      video: { ...current.video, [key]: value },
+    }));
+  };
+
+  const submitStory = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append('aboutEyebrow', storyDraft.about.eyebrow);
+    formData.append('aboutTitle', storyDraft.about.title);
+    formData.append('aboutHighlight', storyDraft.about.highlight);
+    formData.append('aboutBody', storyDraft.about.body);
+    formData.append('aboutQuote', storyDraft.about.quote);
+    formData.append('videoTitle', storyDraft.video.title);
+    formData.append('videoCaption', storyDraft.video.caption);
+    formData.append('videoUrl', storyDraft.video.videoUrl);
+    if (aboutImage) formData.append('aboutImage', aboutImage);
+    if (videoPoster) formData.append('videoPoster', videoPoster);
+    if (videoFile) formData.append('videoFile', videoFile);
+    await onSave(formData);
+    setAboutImage(null);
+    setVideoPoster(null);
+    setVideoFile(null);
+  };
+
+  return (
+    <form className="grid gap-6" onSubmit={submitStory}>
+      <div className="grid gap-5 rounded-lg border border-[#9DB36B]/30 bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+        <div className="grid gap-3">
+          <h3 className="font-black text-[#5A7C2E]">Image and Write-up</h3>
+          <img className="aspect-[1.38] w-full rounded-lg object-cover" src={storyDraft.about.image} alt={storyDraft.about.title} />
+          <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+            <Upload size={20} />
+            <span className="min-w-0 truncate">{aboutImage ? aboutImage.name : 'Replace section image'}</span>
+            <input className="hidden" type="file" accept="image/*" onChange={(event) => setAboutImage(event.target.files?.[0] || null)} />
+          </label>
+        </div>
+        <div className="grid min-w-0 gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className={labelClass}>
+              Small label
+              <input className={fieldClass} value={storyDraft.about.eyebrow} onChange={(event) => updateAbout('eyebrow', event.target.value)} />
+            </label>
+            <label className={`${labelClass} md:col-span-2`}>
+              Heading
+              <input className={fieldClass} value={storyDraft.about.title} onChange={(event) => updateAbout('title', event.target.value)} />
+            </label>
+          </div>
+          <label className={labelClass}>
+            Highlighted word
+            <input className={fieldClass} value={storyDraft.about.highlight} onChange={(event) => updateAbout('highlight', event.target.value)} placeholder="Example: value" />
+          </label>
+          <label className={labelClass}>
+            Write-up
+            <textarea className={`${fieldClass} min-h-44 resize-y`} value={storyDraft.about.body} onChange={(event) => updateAbout('body', event.target.value)} />
+          </label>
+          <label className={labelClass}>
+            Quote
+            <textarea className={`${fieldClass} min-h-28 resize-y`} value={storyDraft.about.quote} onChange={(event) => updateAbout('quote', event.target.value)} />
+          </label>
+        </div>
+      </div>
+
+      <div className="grid gap-5 rounded-lg border border-[#9DB36B]/30 bg-white p-4 sm:p-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+        <div className="grid gap-3">
+          <h3 className="font-black text-[#5A7C2E]">Story Video</h3>
+          {storyDraft.video.videoUrl ? (
+            <video className="aspect-video w-full rounded-lg object-cover" controls poster={storyDraft.video.poster}>
+              <source src={storyDraft.video.videoUrl} />
+            </video>
+          ) : (
+            <img className="aspect-video w-full rounded-lg object-cover" src={storyDraft.video.poster} alt={storyDraft.video.title} />
+          )}
+          <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+            <Upload size={20} />
+            <span className="min-w-0 truncate">{videoPoster ? videoPoster.name : 'Replace video poster'}</span>
+            <input className="hidden" type="file" accept="image/*" onChange={(event) => setVideoPoster(event.target.files?.[0] || null)} />
+          </label>
+          <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+            <Upload size={20} />
+            <span className="min-w-0 truncate">{videoFile ? videoFile.name : 'Upload video file'}</span>
+            <input className="hidden" type="file" accept="video/*" onChange={(event) => setVideoFile(event.target.files?.[0] || null)} />
+          </label>
+        </div>
+        <div className="grid min-w-0 gap-4">
+          <label className={labelClass}>
+            Video heading
+            <input className={fieldClass} value={storyDraft.video.title} onChange={(event) => updateVideo('title', event.target.value)} />
+          </label>
+          <label className={labelClass}>
+            Video caption
+            <textarea className={`${fieldClass} min-h-28 resize-y`} value={storyDraft.video.caption} onChange={(event) => updateVideo('caption', event.target.value)} />
+          </label>
+          <label className={labelClass}>
+            Video URL
+            <input className={fieldClass} value={storyDraft.video.videoUrl} onChange={(event) => updateVideo('videoUrl', event.target.value)} placeholder="Optional video URL or uploaded video path" />
+          </label>
+        </div>
+      </div>
+
+      <button className={`${primaryButton} w-full sm:w-fit`} type="submit" disabled={busy}>
+        Save Story Sections <Save size={18} />
+      </button>
+    </form>
   );
 }
 

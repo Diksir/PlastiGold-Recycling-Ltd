@@ -59,5 +59,21 @@
       "caption": "Sorted plastic waste prepared for recycling.",
       "image": "/assets/gallery-yard.svg"
     }
-  ]
+  ],
+  "story": {
+    "about": {
+      "eyebrow": "From the team",
+      "title": "From recovery to recycled value",
+      "highlight": "value",
+      "body": "PlastiGold Recycling Ltd is building a practical recycling operation in Kano, focused on recovering plastic waste and preparing it for productive industrial reuse. We work with businesses, collectors, and local communities to move valuable material away from unmanaged waste streams and back into manufacturing supply chains.",
+      "quote": "Our goal is simple: turn plastic waste into dependable recycled input while supporting cleaner communities and local economic value.",
+      "image": "/assets/product-material-bags.jpeg"
+    },
+    "video": {
+      "title": "Follow our story",
+      "caption": "See how recovered materials move through collection, sorting, processing, and supply.",
+      "poster": "/assets/recycling-plant.svg",
+      "videoUrl": ""
+    }
+  }
 }
