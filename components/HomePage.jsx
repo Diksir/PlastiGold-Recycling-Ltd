@@ -66,6 +66,7 @@ function Navbar() {
 export default function HomePage() {
   const { content, loading, error } = useContent();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
   const slides = content.slides.length ? content.slides : defaultContent.slides;
   const galleryImages = content.gallery.length ? content.gallery : defaultContent.gallery;
   const activeImage = slides[activeSlide] || slides[0];
@@ -74,6 +75,11 @@ export default function HomePage() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowIntro(false), 1650);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -93,35 +99,29 @@ export default function HomePage() {
 
   return (
     <>
+      {showIntro && <IntroScreen />}
       <Navbar />
       <main className="overflow-x-hidden bg-[#F3F9E9] text-[#111827]">
-        <section id="home" className={`relative grid min-h-[calc(100vh-73px)] items-end overflow-hidden bg-[#111827] ${pageX} py-10 md:items-center md:py-14`}>
-          <div className="absolute inset-0">
-            {slides.map((slide, index) => (
-              <img className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-70' : 'scale-105 opacity-0'}`} src={slide.image} alt={slide.title} key={slide.id || slide.title} />
-            ))}
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(17,24,39,0.94)_0%,rgba(17,24,39,0.76)_46%,rgba(17,24,39,0.26)_100%)]" />
-          </div>
-
+        <section id="home" className={`relative grid min-h-[calc(100vh-73px)] items-end overflow-hidden bg-white ${pageX} py-10 md:items-center md:py-14`}>
           <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,0.98fr)_minmax(320px,0.72fr)] lg:items-end">
             <div className="max-w-3xl py-10">
-              <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#C4F262]">Plastic recycling in Kano</p>
-              <h1 className="text-[clamp(2.8rem,7vw,6.8rem)] font-black leading-none text-white">{content.hero.title}</h1>
-              <p className="mt-5 max-w-2xl text-xl font-bold leading-8 text-[#E9F3D6] md:text-2xl">{content.hero.tagline}</p>
-              <p className="mt-5 max-w-2xl leading-8 text-white/80">We recover, sort, process, and supply recycled plastic materials for businesses that want cleaner operations and stronger circular production.</p>
+              <p className="mb-4 text-xs font-black uppercase tracking-widest text-[#7BA717]">Plastic recycling in Kano</p>
+              <h1 className="text-[clamp(2.8rem,7vw,6.8rem)] font-black leading-none text-[#111827]">{content.hero.title}</h1>
+              <p className="mt-5 max-w-2xl text-xl font-bold leading-8 text-[#5A7C2E] md:text-2xl">{content.hero.tagline}</p>
+              <p className="mt-5 max-w-2xl leading-8 text-[#4b5563]">We recover, sort, process, and supply recycled plastic materials for businesses that want cleaner operations and stronger circular production.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <a className={primaryButton} href="#services">Explore Services <ArrowRight size={18} /></a>
-                <a className={lightButton} href="#contact">Work With Us <Phone size={18} /></a>
+                <a className={outlineButton} href="#contact">Work With Us <Phone size={18} /></a>
               </div>
-              {error && <p className="mt-4 text-sm font-semibold text-[#E9F3D6]">Using saved website placeholders until content loads.</p>}
+              {error && <p className="mt-4 text-sm font-semibold text-[#5A7C2E]">Using saved website placeholders until content loads.</p>}
             </div>
 
-            <div className="rounded-lg border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-sm">
+            <div className="rounded-lg border border-[#9DB36B]/25 bg-[#F3F9E9] p-4 shadow-2xl">
               <img className="aspect-[1.25] w-full rounded-lg object-cover" src={activeImage.image} alt={activeImage.title} />
               <div className="mt-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-[#C4F262]">Featured material</p>
-                  <p className="mt-1 font-black text-white">{activeImage.title}</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-[#7BA717]">Featured material</p>
+                  <p className="mt-1 font-black text-[#111827]">{activeImage.title}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#5A7C2E]" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
@@ -274,6 +274,17 @@ export default function HomePage() {
         <MessageCircle size={26} />
       </a>
     </>
+  );
+}
+
+function IntroScreen() {
+  return (
+    <div className="intro-screen fixed inset-0 z-50 flex items-start justify-center bg-white px-6 pt-16 md:pt-20">
+      <div className="intro-mark relative overflow-hidden rounded-lg bg-white p-4">
+        <img className="relative z-10 h-24 w-auto md:h-32" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd logo" />
+        <span className="intro-light absolute inset-y-0 -left-1/2 w-1/2 bg-white/70" />
+      </div>
+    </div>
   );
 }
 

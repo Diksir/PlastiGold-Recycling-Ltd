@@ -34,3 +34,51 @@ textarea {
 img {
   max-width: 100%;
 }
+
+.intro-screen {
+  animation: introFade 1650ms ease forwards;
+}
+
+.intro-mark {
+  animation: introLogo 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.intro-light {
+  animation: introLight 1050ms 260ms ease-in-out both;
+  transform: skewX(-18deg);
+}
+
+@keyframes introFade {
+  0%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes introLogo {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes introLight {
+  0% {
+    opacity: 0;
+    transform: translateX(0) skewX(-18deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
