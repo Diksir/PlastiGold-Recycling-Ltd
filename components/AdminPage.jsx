@@ -370,7 +370,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
 
   return (
     <div className="grid gap-6">
-      <MiniPanel title="Navigation and Hero Feature Text">
+      <MiniPanel title="Navigation and Hero Feature Text" onSave={onSave} busy={busy}>
         <EditableList
           fields={[
             { key: 'label', label: 'Nav label' },
@@ -397,7 +397,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         />
       </MiniPanel>
 
-      <MiniPanel title="Section Headings">
+      <MiniPanel title="Section Headings" onSave={onSave} busy={busy}>
         <div className="grid gap-4 md:grid-cols-2">
           {Object.entries(draft.sections).map(([key, value]) => (
             <label className={labelClass} key={key}>
@@ -408,7 +408,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         </div>
       </MiniPanel>
 
-      <MiniPanel title="Impact Statistics">
+      <MiniPanel title="Impact Statistics" onSave={onSave} busy={busy}>
         <EditableList
           fields={[
             { key: 'value', label: 'Number' },
@@ -424,7 +424,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         />
       </MiniPanel>
 
-      <MiniPanel title="Services and Service Images">
+      <MiniPanel title="Services and Service Images" onSave={onSave} busy={busy}>
         <div className="grid gap-4">
           {draft.services.map((service, index) => (
             <div className="grid gap-4 rounded-lg border border-[#9DB36B]/30 bg-white p-4 md:grid-cols-[180px_minmax(0,1fr)_auto]" key={`${service.name}-${index}`}>
@@ -448,7 +448,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         </div>
       </MiniPanel>
 
-      <MiniPanel title="Recycling Process">
+      <MiniPanel title="Recycling Process" onSave={onSave} busy={busy}>
         <EditableList
           fields={[
             { key: 'step', label: 'Step' },
@@ -464,7 +464,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         />
       </MiniPanel>
 
-      <MiniPanel title="Why Choose Cards">
+      <MiniPanel title="Why Choose Cards" onSave={onSave} busy={busy}>
         <EditableList
           fields={[
             { key: 'title', label: 'Title' },
@@ -479,7 +479,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         />
       </MiniPanel>
 
-      <MiniPanel title="CTA, Footer and Contact Details">
+      <MiniPanel title="CTA, Footer and Contact Details" onSave={onSave} busy={busy}>
         <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
           <MediaUploadField accept="image/*" busy={busy} label="CTA background" onChange={(url) => setGroupField('cta', 'image', url)} onUpload={onUpload} value={draft.cta.image} />
           <div className="grid gap-4 md:grid-cols-2">
@@ -523,10 +523,17 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
   );
 }
 
-function MiniPanel({ children, title }) {
+function MiniPanel({ busy, children, onSave, title }) {
   return (
     <section className="rounded-lg border border-[#9DB36B]/30 bg-[#FBFFF6] p-4">
-      <h3 className="mb-4 text-lg font-black text-[#5A7C2E]">{title}</h3>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="text-lg font-black text-[#5A7C2E]">{title}</h3>
+        {onSave && (
+          <button className={`${primaryButton} w-full sm:w-auto`} onClick={onSave} disabled={busy} type="button">
+            Save <Save size={18} />
+          </button>
+        )}
+      </div>
       {children}
     </section>
   );
