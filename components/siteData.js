@@ -1,7 +1,7 @@
 export const defaultContent = {
   hero: {
     title: 'PlastiGold Recycling Ltd',
-    tagline: 'Turning Plastic Waste into a Better Future',
+    tagline: 'Turning Plastic Waste Into Sustainable Value',
   },
   slides: [
     { id: 'slide-red-pellets-01', title: 'Red recycled plastic pellets', image: '/assets/slide-red-pellets-01.jpeg' },
@@ -52,26 +52,32 @@ export const defaultContent = {
 
 export const services = [
   {
-    name: 'Plastic Collection',
-    description: 'Coordinated recovery of recyclable plastic materials from businesses, communities, and industrial partners across Kano.',
-    image: '/assets/product-brown-pellets.jpeg',
+    name: 'Plastic Waste Collection',
+    description: 'Efficient collection of plastic waste from households, businesses, and industries.',
+    image: '/assets/product-material-bags.jpeg',
   },
   {
     name: 'Sorting and Processing',
-    description: 'Disciplined material separation, cleaning, and preparation that helps plastic waste return to useful production streams.',
+    description: 'Advanced sorting and processing to ensure high-quality recyclable materials.',
     image: '/assets/product-white-pellets.jpeg',
   },
   {
-    name: 'Recycled Materials Supply',
-    description: 'Reliable regrind, pellets, and mixed plastic materials supplied for manufacturing and circular production.',
+    name: 'Recycling Solutions',
+    description: 'Turning plastic waste into recycled products and raw materials for industries.',
     image: '/assets/product-dark-pellets.jpeg',
+  },
+  {
+    name: 'Community Programs',
+    description: 'Education, awareness, and community recycling programs for a sustainable future.',
+    image: '/assets/gallery-yard.svg',
   },
 ];
 
 export const impactStats = [
-  { value: '250+', label: 'Plastic Recycled', detail: 'Tons of material moved back into productive use.' },
-  { value: '40+', label: 'Jobs Created', detail: 'Local work supported through sorting, handling, and operations.' },
-  { value: '12+', label: 'Communities Served', detail: 'Collection relationships across Kano business and community areas.' },
+  { value: '2,450+', label: 'Tons of Plastic Recycled', detail: 'Material moved back into productive use.' },
+  { value: '350+', label: 'Jobs Created', detail: 'Local work supported through sorting, handling, and operations.' },
+  { value: '25+', label: 'Communities Served', detail: 'Collection relationships across Kano business and community areas.' },
+  { value: '8+', label: 'Years of Operation', detail: 'Practical experience in recycling and material recovery.' },
 ];
 
 export const partners = ['Manufacturers', 'Local Collectors', 'Community Groups', 'Industrial Buyers'];
@@ -79,23 +85,28 @@ export const partners = ['Manufacturers', 'Local Collectors', 'Community Groups'
 export const processSteps = [
   {
     step: '01',
-    title: 'Recover',
-    text: 'Plastic materials are collected through local relationships with businesses, collectors, and communities.',
+    title: 'Collection',
+    text: 'We collect plastic waste from various sources responsibly.',
   },
   {
     step: '02',
-    title: 'Sort',
-    text: 'Materials are separated by type, quality, and production readiness to reduce contamination.',
+    title: 'Sorting',
+    text: 'Materials are sorted by type, color, and quality.',
   },
   {
     step: '03',
-    title: 'Process',
-    text: 'Recovered plastic is prepared into usable recycled material streams for industrial partners.',
+    title: 'Processing',
+    text: 'Plastic waste is cleaned, shredded, and processed into flakes.',
   },
   {
     step: '04',
-    title: 'Supply',
-    text: 'Manufacturers receive consistent recycled inputs that support circular production and cleaner value chains.',
+    title: 'Recycling',
+    text: 'Processed materials are recycled into high-quality raw materials.',
+  },
+  {
+    step: '05',
+    title: 'Reuse',
+    text: 'Recycled materials are used to create new products.',
   },
 ];
 
@@ -103,10 +114,8 @@ export const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'About Us', href: '#about' },
   { label: 'Services', href: '#services' },
-  { label: 'Impact', href: '#impact' },
   { label: 'Process', href: '#process' },
   { label: 'Gallery', href: '#gallery' },
-  { label: 'Partners', href: '#partners' },
   { label: 'Contact', href: '#contact' },
 ];
 
