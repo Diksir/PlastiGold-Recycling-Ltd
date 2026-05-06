@@ -29,10 +29,9 @@ import {
   whatsappUrl,
 } from './siteData';
 
-const shell = 'mx-auto grid w-full max-w-[1600px] gap-6 xl:grid-cols-2';
-const sectionCard = 'rounded-lg border border-black/5 bg-white shadow-[0_14px_45px_rgba(17,24,39,0.08)]';
-const green = '#083d29';
-const gold = '#c9a34a';
+const pageShell = 'mx-auto flex w-full max-w-[1500px] flex-col';
+const sectionCard = 'border-b border-black/5 bg-white';
+const sectionPad = 'px-[clamp(20px,5vw,72px)] py-16 md:py-24';
 const buttonBase = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-5 py-3 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-[#c9a34a]/50 focus:ring-offset-2';
 const primaryButton = `${buttonBase} bg-[#0a7a3e] text-white shadow-[0_16px_34px_rgba(10,122,62,0.24)] hover:-translate-y-0.5 hover:bg-[#086b36]`;
 const goldButton = `${buttonBase} bg-[#c9a34a] text-white shadow-[0_16px_34px_rgba(201,163,74,0.28)] hover:-translate-y-0.5 hover:bg-[#b69038]`;
@@ -93,8 +92,8 @@ export default function HomePage() {
 
   return (
     <>
-      <main className="overflow-x-hidden bg-[#f6f7f2] px-3 py-3 text-[#13251b] md:px-6 md:py-6">
-        <div className={shell}>
+      <main className="overflow-x-hidden bg-white text-[#13251b]">
+        <div className={pageShell}>
           <HeroCard
             activeImage={activeImage}
             activeSlide={activeSlide}
@@ -128,7 +127,7 @@ export default function HomePage() {
 
 function HeroCard({ activeImage, activeSlide, content, error, goToSlide, setActiveSlide, slides }) {
   return (
-    <section id="home" className={`${sectionCard} relative min-h-[680px] overflow-hidden bg-[#031d14] p-5 text-white md:p-8 xl:min-h-[760px]`}>
+    <section id="home" className="relative min-h-[700px] overflow-hidden bg-[#031d14] px-[clamp(20px,5vw,72px)] py-6 text-white md:py-8 xl:min-h-[820px]">
       <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={activeImage.image} alt={activeImage.title} />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,23,15,0.96)_0%,rgba(2,30,20,0.88)_42%,rgba(2,23,15,0.34)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(201,163,74,0.24),transparent_34%)]" />
@@ -136,7 +135,7 @@ function HeroCard({ activeImage, activeSlide, content, error, goToSlide, setActi
       <div className="relative z-10 flex min-h-[620px] flex-col md:min-h-[700px]">
         <HeroNav />
 
-        <div className="flex flex-1 items-center py-14">
+        <div className="flex flex-1 items-center py-16 md:py-20">
           <div className="max-w-3xl">
             <p className="mb-5 text-sm font-bold text-white/80">{content.hero.title}</p>
             <HeroTitle text={content.hero.tagline} />
@@ -234,7 +233,7 @@ function HeroFeature({ icon: Icon, title, text }) {
 
 function ImpactSection() {
   return (
-    <section id="impact" className={`${sectionCard} px-5 py-9 md:px-8`}>
+    <section id="impact" className={`${sectionCard} ${sectionPad}`}>
       <CenteredTitle icon={Leaf} title="Our Impact in Numbers" copy="" />
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {impactStats.map((stat, index) => (
@@ -262,7 +261,7 @@ function ImpactCard({ index, stat }) {
 
 function AboutSection({ story }) {
   return (
-    <section id="about" className={`${sectionCard} grid gap-8 px-5 py-9 md:grid-cols-[0.9fr_1.1fr] md:px-8 md:py-10 md:items-center`}>
+    <section id="about" className={`${sectionCard} ${sectionPad} grid gap-10 md:items-center lg:grid-cols-[0.9fr_1.1fr]`}>
       <img className="aspect-[1.08] w-full rounded-lg object-cover" src={story.about.image} alt={story.about.title} loading="lazy" decoding="async" />
       <div>
         <h2 className="text-[clamp(2rem,3.2vw,3.5rem)] font-black leading-tight text-[#0e2118]">About PlastiGold Recycling Ltd.</h2>
@@ -293,7 +292,7 @@ function ValueLine({ title, text }) {
 
 function ServicesSection() {
   return (
-    <section id="services" className={`${sectionCard} px-5 py-9 md:px-8 md:py-10`}>
+    <section id="services" className={`${sectionCard} ${sectionPad}`}>
       <CenteredTitle title="Our Services" copy="Comprehensive recycling solutions for a cleaner and sustainable future." />
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {services.map((service, index) => (
@@ -329,7 +328,7 @@ function ServiceCard({ index, service }) {
 
 function ProcessSection() {
   return (
-    <section id="process" className="rounded-lg bg-[radial-gradient(circle_at_50%_0%,rgba(92,149,62,0.38),transparent_34%),linear-gradient(135deg,#073a27_0%,#021b13_100%)] px-5 py-10 text-white shadow-[0_14px_45px_rgba(17,24,39,0.12)] md:px-8 md:py-12">
+    <section id="process" className={`${sectionPad} bg-[radial-gradient(circle_at_50%_0%,rgba(92,149,62,0.38),transparent_34%),linear-gradient(135deg,#073a27_0%,#021b13_100%)] text-white`}>
       <CenteredTitle dark title="Our Recycling Process" copy="From waste to value, our process is simple, efficient, and environmentally responsible." />
       <ol className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-5">
         {processSteps.map((step, index) => (
@@ -349,7 +348,7 @@ function ProcessSection() {
 
 function GallerySection({ galleryGrid, loading }) {
   return (
-    <section id="gallery" className={`${sectionCard} px-5 py-9 md:px-8 md:py-10`}>
+    <section id="gallery" className={`${sectionCard} ${sectionPad}`}>
       <CenteredTitle title="Our Gallery" copy="A glimpse of our operations, team, and impact." />
       {loading && <p className="mt-3 text-center text-sm text-[#66736a]">Loading latest images...</p>}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -368,7 +367,7 @@ function GallerySection({ galleryGrid, loading }) {
 
 function WhySection() {
   return (
-    <section className={`${sectionCard} px-5 py-9 md:px-8 md:py-10`}>
+    <section className={`${sectionCard} ${sectionPad}`}>
       <CenteredTitle title="Why Choose PlastiGold?" copy="We deliver impact, value, and trust in everything we do." />
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {whyCards.map((card) => (
@@ -395,7 +394,7 @@ function WhyCard({ card }) {
 
 function CtaSection({ story }) {
   return (
-    <section id="partners" className="relative min-h-[280px] overflow-hidden rounded-lg bg-[#063520] px-5 py-10 text-white shadow-[0_14px_45px_rgba(17,24,39,0.12)] md:px-8 md:py-12">
+    <section id="partners" className={`relative min-h-[360px] overflow-hidden bg-[#063520] ${sectionPad} text-white`}>
       <img className="absolute inset-0 h-full w-full object-cover opacity-36" src={story.about.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,45,28,0.96),rgba(4,45,28,0.72),rgba(4,45,28,0.38))]" />
       <div className="relative z-10 max-w-2xl">
@@ -409,7 +408,7 @@ function CtaSection({ story }) {
 
 function Footer() {
   return (
-    <footer id="contact" className="rounded-lg bg-[linear-gradient(135deg,#062819_0%,#02140e_100%)] px-5 py-9 text-white shadow-[0_14px_45px_rgba(17,24,39,0.12)] md:px-8 md:py-10">
+    <footer id="contact" className="bg-[linear-gradient(135deg,#062819_0%,#02140e_100%)] px-[clamp(20px,5vw,72px)] py-12 text-white md:py-16">
       <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.9fr_1fr]">
         <div>
           <img className="h-14 w-auto rounded-md bg-white p-1.5" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
