@@ -119,9 +119,13 @@ export default function HomePage() {
               {error && <p className="mt-4 text-sm font-semibold text-[#4c6f94]">Using saved website placeholders until content loads.</p>}
             </div>
 
-            <div className="relative min-h-[420px] lg:min-h-[640px]">
-              <div className="absolute right-0 top-8 h-[72%] w-[78%] rounded-[54%_46%_48%_52%/45%_55%_45%_55%] bg-[#b8ff12]" />
-              <div className="absolute bottom-6 left-0 h-[58%] w-[82%] overflow-hidden rounded-[52%_48%_44%_56%/50%_43%_57%_50%] bg-neutral-100 shadow-[0_32px_80px_rgba(32,43,69,0.14)] md:left-8 md:w-[86%]">
+            <div className="relative">
+              <div className="absolute -right-4 -top-4 hidden h-40 w-40 rounded-full bg-[#b8ff12]/70 blur-2xl md:block" />
+              <div className="relative overflow-hidden rounded-[1.75rem] bg-[#f6f8f2] p-3 shadow-[0_32px_80px_rgba(32,43,69,0.14)]">
+                <div className="absolute right-6 top-6 z-10 rounded-full bg-[#b8ff12] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#202b45]">
+                  Recycled materials
+                </div>
+                <div className="relative aspect-[0.95] overflow-hidden rounded-[1.35rem] bg-neutral-100 md:aspect-[1.05]">
                 {slides.map((slide, index) => (
                   <img
                     className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
@@ -130,24 +134,29 @@ export default function HomePage() {
                     key={slide.id || slide.title}
                   />
                 ))}
-              </div>
-              <div className="absolute bottom-0 right-0 rounded-2xl bg-white/90 p-4 shadow-[0_18px_45px_rgba(32,43,69,0.12)] backdrop-blur">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b5d34]">Featured material</p>
-                <p className="mt-1 font-black text-[#202b45]">{activeImage.title}</p>
-                <div className="mt-4 flex items-center gap-2">
-                  <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
-                  <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
                 </div>
               </div>
-              <div className="absolute bottom-1 left-8 flex items-center gap-2">
-                {slides.slice(0, 7).map((slide, index) => (
-                  <button
-                    className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#b8ff12]' : 'w-2 bg-[#202b45]/25'}`}
-                    onClick={() => setActiveSlide(index)}
-                    aria-label={`Show ${slide.title}`}
-                    key={`dot-${slide.id || slide.title}`}
-                  />
-                ))}
+              <div className="mt-5 flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-[0_18px_45px_rgba(32,43,69,0.10)] sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b5d34]">Featured material</p>
+                  <p className="mt-1 font-black text-[#202b45]">{activeImage.title}</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {slides.slice(0, 7).map((slide, index) => (
+                      <button
+                        className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#b8ff12]' : 'w-2 bg-[#202b45]/25'}`}
+                        onClick={() => setActiveSlide(index)}
+                        aria-label={`Show ${slide.title}`}
+                        key={`dot-${slide.id || slide.title}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
+                    <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
