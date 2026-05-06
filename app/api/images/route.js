@@ -12,7 +12,7 @@ export async function GET() {
       .filter((file) => file.isFile())
       .map((file) => ({
         filename: file.name,
-        url: `/uploads/${file.name}`,
+        url: `/api/images/${file.name}`,
       }))
       .sort((a, b) => b.filename.localeCompare(a.filename));
     return json(images);

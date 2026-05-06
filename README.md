@@ -33,6 +33,7 @@ Create `.env.local` in the project root:
 ```bash
 ADMIN_EMAIL=admin@plastigoldrecycling.com
 ADMIN_PASSWORD=change-this-password
+AUTH_SECRET=use-a-long-random-secret
 UPLOADS_DIR=./public/uploads
 DATA_DIR=./data
 ```
@@ -43,7 +44,7 @@ DATA_DIR=./data
 2. Open `http://localhost:3000/admin`.
 3. Login with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` values from `.env.local`.
 4. Edit the homepage title/tagline, upload hero slider images, reorder slides, edit the story write-up/image/video section, and manage gallery captions.
-5. Uploaded files are stored in `public/uploads`.
+5. Uploaded files are stored in `public/uploads` locally and served through `/api/images` in production.
 6. Editable website content is stored in `data/content.json`.
 
 Default development credentials are `admin@plastigoldrecycling.com` and `admin123` if environment variables are not set. Change these before using the site publicly.
@@ -70,4 +71,7 @@ Deploy the project to Vercel from the repository root. The included `vercel.json
 ```bash
 ADMIN_EMAIL=admin@plastigoldrecycling.com
 ADMIN_PASSWORD=use-a-strong-password
+AUTH_SECRET=use-a-long-random-secret
 ```
+
+Do not set `UPLOADS_DIR=./public/uploads` on Vercel. Vercel's deployed filesystem is read-only, so runtime uploads use a writable temporary directory unless you connect permanent storage such as Vercel Blob or a database-backed media service.
