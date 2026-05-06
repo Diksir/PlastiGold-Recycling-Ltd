@@ -34,30 +34,29 @@ const pageX = 'px-[clamp(20px,5vw,80px)]';
 const sectionY = 'py-20 md:py-28';
 const container = 'mx-auto w-full max-w-7xl';
 const buttonBase = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#c7a247]/45 focus:ring-offset-2';
-const primaryButton = `${buttonBase} bg-[#0b5d34] text-white shadow-[0_16px_34px_rgba(11,93,52,0.25)] hover:-translate-y-0.5 hover:bg-[#084729]`;
-const darkButton = `${buttonBase} bg-[#111827] text-white shadow-[0_16px_34px_rgba(17,24,39,0.20)] hover:-translate-y-0.5 hover:bg-black`;
-const lightButton = `${buttonBase} border border-white/25 bg-white text-[#111827] hover:-translate-y-0.5 hover:bg-neutral-100`;
+const primaryButton = `${buttonBase} bg-[#b8ff12] text-[#111827] shadow-[0_16px_34px_rgba(184,255,18,0.28)] hover:-translate-y-0.5 hover:bg-[#a6eb0f]`;
+const playButton = 'inline-flex items-center gap-4 font-black text-[#29476b] transition hover:text-[#0b5d34]';
 const outlineButton = `${buttonBase} border border-[#111827]/15 bg-white text-[#111827] hover:-translate-y-0.5 hover:border-[#0b5d34]/35 hover:text-[#0b5d34]`;
 
 function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-black/8 bg-white/95 backdrop-blur-xl">
-      <div className={`${container} ${pageX} flex items-center justify-between gap-6 py-3`}>
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl">
+      <div className={`${container} ${pageX} flex items-center justify-between gap-6 py-7`}>
         <a className="flex items-center" href="#home" aria-label="PlastiGold Recycling Ltd home">
-          <img className="h-12 w-auto md:h-14" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd logo" />
+          <img className="h-14 w-auto md:h-16" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd logo" />
         </a>
         <button className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-[#111827] shadow-sm lg:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <nav className={`${open ? 'grid' : 'hidden'} absolute left-4 right-4 top-20 gap-1 rounded-2xl border border-black/10 bg-white p-3 shadow-2xl lg:static lg:flex lg:items-center lg:bg-transparent lg:p-0 lg:shadow-none lg:border-0`} aria-label="Primary navigation">
+        <nav className={`${open ? 'grid' : 'hidden'} absolute left-4 right-4 top-24 gap-1 rounded-2xl border border-black/10 bg-white p-3 shadow-2xl lg:static lg:flex lg:items-center lg:bg-transparent lg:p-0 lg:shadow-none lg:border-0`} aria-label="Primary navigation">
           {navItems.map((item) => (
-            <a className="rounded-full px-4 py-3 text-sm font-bold text-[#374151] transition hover:text-[#0b5d34] lg:py-2" key={item.href} href={item.href} onClick={() => setOpen(false)}>
+            <a className="rounded-full px-4 py-3 text-sm font-medium text-[#23517a] transition hover:text-[#0b5d34] lg:py-2" key={item.href} href={item.href} onClick={() => setOpen(false)}>
               {item.label}
             </a>
           ))}
-          <a className="rounded-full border border-[#111827]/15 px-5 py-3 text-sm font-black text-[#111827] transition hover:border-[#0b5d34] hover:text-[#0b5d34] lg:py-2.5" href="/admin">
+          <a className="rounded-full px-5 py-3 text-sm font-black text-[#111827] transition hover:text-[#0b5d34] lg:ml-10 lg:py-2.5" href="/admin">
             Admin
           </a>
         </nav>
@@ -98,22 +97,30 @@ export default function HomePage() {
     <>
       <Navbar />
       <main className="overflow-x-hidden bg-white text-[#111827]">
-        <section id="home" className="bg-[#101418] text-white">
-          <div className={`${container} ${pageX} grid min-h-[calc(100vh-73px)] gap-10 py-12 md:py-16 lg:grid-cols-[0.94fr_1.06fr] lg:items-center`}>
-            <div className="max-w-4xl">
-              <p className="mb-5 text-xs font-black uppercase tracking-[0.18em] text-[#c7a247]">Circular materials. Cleaner industry.</p>
-              <h1 className="text-[clamp(3.1rem,8vw,7.4rem)] font-black leading-[0.9] tracking-tight">{content.hero.title}</h1>
-              <p className="mt-6 max-w-2xl text-xl font-semibold leading-8 text-white/82 md:text-2xl">{content.hero.tagline}</p>
-              <p className="mt-5 max-w-2xl leading-8 text-white/66">PlastiGold Recycling Ltd recovers plastic waste and prepares reliable recycled materials for manufacturers, businesses, and partners building cleaner value chains.</p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <a className={primaryButton} href="#contact">Start a Partnership <ArrowRight size={18} /></a>
-                <a className={lightButton} href="#services">Explore Services <Recycle size={18} /></a>
+        <section id="home" className="relative bg-white">
+          <div className={`${container} ${pageX} grid min-h-[calc(100vh-122px)] gap-12 pb-20 pt-16 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:pt-20`}>
+            <div className="max-w-3xl">
+              <p className="mb-6 text-sm font-medium text-[#23517a]">{content.hero.title}</p>
+              <h1 className="text-[clamp(3.4rem,7.2vw,7.2rem)] font-black leading-[0.92] tracking-tight text-[#202b45]">
+                Transforming plastic waste into{' '}
+                <span className="bg-[linear-gradient(90deg,#fff9af_0%,#b8ff12_82%)] bg-clip-text text-transparent">industrial value</span>
+              </h1>
+              <p className="mt-7 max-w-2xl text-lg leading-8 text-[#4c6f94]">{content.hero.tagline}. PlastiGold recovers, processes, and supplies recycled plastic materials for cleaner production in Nigeria.</p>
+              <div className="mt-9 flex flex-col gap-5 sm:flex-row sm:items-center">
+                <a className={primaryButton} href="#contact">Recycle with us</a>
+                <a className={playButton} href="#process">
+                  <span className="grid h-14 w-14 place-items-center rounded-full border border-[#111827] text-[#111827]">
+                    <ArrowRight size={18} />
+                  </span>
+                  <span className="leading-tight">See our<br />process</span>
+                </a>
               </div>
-              {error && <p className="mt-4 text-sm font-semibold text-white/70">Using saved website placeholders until content loads.</p>}
+              {error && <p className="mt-4 text-sm font-semibold text-[#4c6f94]">Using saved website placeholders until content loads.</p>}
             </div>
 
-            <div className="relative">
-              <div className="relative aspect-[1.08] overflow-hidden rounded-[1.4rem] bg-neutral-900 shadow-[0_28px_70px_rgba(0,0,0,0.38)]">
+            <div className="relative min-h-[420px] lg:min-h-[640px]">
+              <div className="absolute right-0 top-8 h-[72%] w-[78%] rounded-[54%_46%_48%_52%/45%_55%_45%_55%] bg-[#b8ff12]" />
+              <div className="absolute bottom-6 left-0 h-[58%] w-[82%] overflow-hidden rounded-[52%_48%_44%_56%/50%_43%_57%_50%] bg-neutral-100 shadow-[0_32px_80px_rgba(32,43,69,0.14)] md:left-8 md:w-[86%]">
                 {slides.map((slide, index) => (
                   <img
                     className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === activeSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
@@ -122,22 +129,19 @@ export default function HomePage() {
                     key={slide.id || slide.title}
                   />
                 ))}
-                <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(16,20,24,0.72)_0%,rgba(16,20,24,0)_48%)]" />
-                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#c7a247]">Featured material</p>
-                    <p className="mt-1 text-lg font-black">{activeImage.title}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#111827] transition hover:bg-neutral-200" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
-                    <button className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#111827] transition hover:bg-neutral-200" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
-                  </div>
+              </div>
+              <div className="absolute bottom-0 right-0 rounded-2xl bg-white/90 p-4 shadow-[0_18px_45px_rgba(32,43,69,0.12)] backdrop-blur">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b5d34]">Featured material</p>
+                <p className="mt-1 font-black text-[#202b45]">{activeImage.title}</p>
+                <div className="mt-4 flex items-center gap-2">
+                  <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
+                  <button className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[#111827] transition hover:bg-neutral-100" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
                 </div>
               </div>
-              <div className="mt-5 flex items-center gap-2">
+              <div className="absolute bottom-1 left-8 flex items-center gap-2">
                 {slides.slice(0, 7).map((slide, index) => (
                   <button
-                    className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#c7a247]' : 'w-2 bg-white/35'}`}
+                    className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-9 bg-[#b8ff12]' : 'w-2 bg-[#202b45]/25'}`}
                     onClick={() => setActiveSlide(index)}
                     aria-label={`Show ${slide.title}`}
                     key={`dot-${slide.id || slide.title}`}
@@ -267,7 +271,7 @@ export default function HomePage() {
               <ContactLine light icon={<MapPin />} text="Sharada Industrial Area Phase 3, Opposite Aminci Radio, Kano, Nigeria" />
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a className={primaryButton} href={googleMapsUrl} target="_blank" rel="noreferrer">Open Map <MapPin size={18} /></a>
-                <a className={lightButton} href="mailto:yegroupholdings@gmail.com">Email Us <Mail size={18} /></a>
+                <a className={outlineButton} href="mailto:yegroupholdings@gmail.com">Email Us <Mail size={18} /></a>
               </div>
             </div>
             <iframe className="h-[360px] w-full rounded-[1.1rem] border-0 grayscale lg:h-[520px]" title="PlastiGold Recycling Ltd location map" loading="lazy" src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} />
