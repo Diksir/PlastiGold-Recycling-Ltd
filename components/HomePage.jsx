@@ -193,8 +193,8 @@ function HeroNav() {
             {item.label.replace('About Us', 'About')}
           </a>
         ))}
-        <a className="rounded-md bg-[#c9a34a] px-5 py-3 text-sm font-black text-white transition hover:bg-[#b69038] lg:ml-5" href="#contact" onClick={() => setOpen(false)}>
-          Get In Touch
+        <a className="rounded-md bg-[#c9a34a] px-5 py-3 text-sm font-black text-white transition hover:bg-[#b69038] lg:ml-5" href="/admin" onClick={() => setOpen(false)}>
+          Admin
         </a>
       </nav>
     </div>
