@@ -105,6 +105,23 @@ function publicNavigationItems(navItems = []) {
   });
 }
 
+function wrapIndex(index, length) {
+  return length > 0 ? (index + length) % length : 0;
+}
+
+function testimonialInitials(name) {
+  const initials = String(name || 'Guest')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0))
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  return initials || 'G';
+}
+
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
 function Navbar({ navItems }) {
@@ -197,18 +214,20 @@ function Navbar({ navItems }) {
 
 function HeroSection({ slides, hero, impactStats }) {
   const [active, setActive] = useState(0);
-  const heroBadge = impactStats.find((stat) => stat.label?.toLowerCase().includes('year')) || impactStats[3] || impactStats[0];
+  const safeSlides = slides.length ? slides : defaultContent.slides;
+  const safeImpactStats = impactStats.length ? impactStats : defaultContent.impactStats;
+  const heroBadge = safeImpactStats.find((stat) => stat.label?.toLowerCase().includes('year')) || safeImpactStats[3] || safeImpactStats[0];
 
   useEffect(() => {
-    const t = setInterval(() => setActive((p) => (p + 1) % slides.length), 5500);
+    const t = setInterval(() => setActive((p) => wrapIndex(p + 1, safeSlides.length)), 5500);
     return () => clearInterval(t);
-  }, [slides.length]);
+  }, [safeSlides.length]);
 
   return (
     <section id="home" className="relative min-h-screen overflow-hidden">
       {/* Slide backgrounds */}
       <div className="absolute inset-0">
-        {slides.map((slide, i) => (
+        {safeSlides.map((slide, i) => (
           <div
             key={slide.id}
             className={`absolute inset-0 transition-opacity duration-1200 ${
@@ -303,14 +322,14 @@ function HeroSection({ slides, hero, impactStats }) {
           {/* Slide controls */}
           <div className="absolute bottom-10 right-6 flex items-center gap-3 md:right-10">
             <button
-              onClick={() => setActive((p) => (p - 1 + slides.length) % slides.length)}
+              onClick={() => setActive((p) => wrapIndex(p - 1, safeSlides.length))}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
               aria-label="Previous slide"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-1.5">
-              {slides.map((_, i) => (
+              {safeSlides.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActive(i)}
@@ -322,7 +341,7 @@ function HeroSection({ slides, hero, impactStats }) {
               ))}
             </div>
             <button
-              onClick={() => setActive((p) => (p + 1) % slides.length)}
+              onClick={() => setActive((p) => wrapIndex(p + 1, safeSlides.length))}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
               aria-label="Next slide"
             >
@@ -589,11 +608,12 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
   const [active, setActive] = useState(0);
   const [feedback, setFeedback] = useState({ name: '', role: '', text: '', rating: 5 });
   const [feedbackStatus, setFeedbackStatus] = useState('');
-  const activeTestimonial = testimonials[active] || testimonials[0];
+  const safeTestimonials = testimonials.length ? testimonials : defaultContent.testimonials;
+  const activeTestimonial = safeTestimonials[active] || safeTestimonials[0];
 
   useEffect(() => {
-    if (active >= testimonials.length) setActive(0);
-  }, [active, testimonials.length]);
+    if (active >= safeTestimonials.length) setActive(0);
+  }, [active, safeTestimonials.length]);
 
   const submitFeedback = async (event) => {
     event.preventDefault();
@@ -672,15 +692,11 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
             </p>
             <div className="flex min-w-0 items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#52BD71] text-sm font-bold text-white">
-                {activeTestimonial.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join('')}
+                {testimonialInitials(activeTestimonial.name)}
               </div>
               <div className="min-w-0">
-                <div className="break-words font-bold text-white">{activeTestimonial.name}</div>
-                <div className="text-sm text-white/55">{activeTestimonial.role}</div>
+                <div className="break-words font-bold text-white">{activeTestimonial.name || 'Guest'}</div>
+                <div className="text-sm text-white/55">{activeTestimonial.role || 'Customer'}</div>
               </div>
             </div>
             <div className="mt-3 flex gap-1">
@@ -694,14 +710,14 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
           {/* Controls */}
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setActive((p) => (p - 1 + testimonials.length) % testimonials.length)}
+              onClick={() => setActive((p) => wrapIndex(p - 1, safeTestimonials.length))}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10"
               aria-label="Previous testimonial"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-              {testimonials.map((_, i) => (
+              {safeTestimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActive(i)}
@@ -713,7 +729,7 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
               ))}
             </div>
             <button
-              onClick={() => setActive((p) => (p + 1) % testimonials.length)}
+              onClick={() => setActive((p) => wrapIndex(p + 1, safeTestimonials.length))}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10"
               aria-label="Next testimonial"
             >
