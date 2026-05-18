@@ -1,20 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useInView } from 'framer-motion';
 import {
   ArrowRight,
+  Award,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Facebook,
   Factory,
+  Heart,
+  Instagram,
   Leaf,
+  Linkedin,
   Mail,
   MapPin,
   Menu,
   MessageCircle,
+  Package,
   Phone,
+  Play,
+  Quote,
   Recycle,
   ShieldCheck,
+  Star,
+  Truck,
+  Twitter,
+  Users,
   X,
 } from 'lucide-react';
 import useContent from './useContent';
@@ -25,23 +38,1208 @@ import {
   whatsappUrlForContact,
 } from './siteData';
 
-const pageShell = 'mx-auto flex w-full max-w-[1500px] flex-col';
-const sectionCard = 'border-b border-black/5 bg-white';
-const sectionPad = 'px-[clamp(20px,5vw,72px)] py-16 md:py-24';
-const buttonBase = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-5 py-3 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-[#c9a34a]/50 focus:ring-offset-2';
-const primaryButton = `${buttonBase} bg-[#0a7a3e] text-white shadow-[0_16px_34px_rgba(10,122,62,0.24)] hover:-translate-y-0.5 hover:bg-[#086b36]`;
-const goldButton = `${buttonBase} bg-[#c9a34a] text-white shadow-[0_16px_34px_rgba(201,163,74,0.28)] hover:-translate-y-0.5 hover:bg-[#b69038]`;
-const outlineButton = `${buttonBase} border border-white/70 bg-transparent text-white hover:-translate-y-0.5 hover:bg-white hover:text-[#083d29]`;
+// ─── Animation config ─────────────────────────────────────────────────────────
 
-export default function HomePage() {
-  const { content, loading, error } = useContent();
-  const [activeSlide, setActiveSlide] = useState(0);
-  const slides = content.slides.length ? content.slides : defaultContent.slides;
-  const galleryImages = content.gallery.length ? content.gallery : defaultContent.gallery;
+const VP = { once: false, amount: 0.12 };
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 44, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.11 } },
+};
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+
+function AnimatedCounter({ raw, suffix }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.5 });
+  const [display, setDisplay] = useState(0);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    if (!isInView) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplay(0);
+      return;
+    }
+    const target = raw;
+    const duration = 1800;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(eased * target));
+      if (p < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [isInView, raw]);
+
+  return (
+    <span ref={ref}>
+      {display.toLocaleString()}{suffix}
+    </span>
+  );
+}
+
+function parseStat(value) {
+  const raw = parseInt(String(value).replace(/[^0-9]/g, ''), 10) || 0;
+  const suffix = String(value).replace(/[0-9,]/g, '').trim();
+  return { raw, suffix };
+}
+
+function publicNavigationItems(navItems = []) {
+  return navItems.filter((item) => {
+    const label = item.label?.trim().toLowerCase();
+    const href = item.href?.trim().toLowerCase();
+    return label !== 'admin' && href !== '/admin' && href !== '/pg-internal-console';
+  });
+}
+
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+
+function Navbar({ navItems }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const publicNavItems = publicNavigationItems(navItems);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]' : 'bg-white/96 backdrop-blur-sm'
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <div className="flex h-[72px] items-center justify-between">
+          {/* Logo */}
+          <a href="#home" className="flex items-center" aria-label="PlastiGold Recycling Ltd home">
+            <img
+              className="h-9 w-auto"
+              src="/assets/plastigold-logo.svg"
+              alt="PlastiGold Recycling Ltd"
+            />
+          </a>
+
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-7 md:flex">
+            {publicNavItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="text-[13px] font-semibold text-[#153426] transition-colors hover:text-[#0A5C36]"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          {/* CTA + hamburger */}
+          <div className="flex items-center gap-4">
+            <a
+              href="#contact"
+              className="hidden rounded-full bg-[#0A5C36] px-5 py-2.5 text-[13px] font-bold text-white transition hover:bg-[#086b36] md:inline-flex"
+            >
+              Get In Touch
+            </a>
+            <button
+              onClick={() => setOpen(!open)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-[#153426] md:hidden"
+              aria-label="Toggle menu"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {open && (
+        <div className="border-t border-black/5 bg-white px-5 pb-5 md:hidden">
+          {publicNavItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="block border-b border-black/5 py-3 text-sm font-semibold text-[#153426] hover:text-[#0A5C36]"
+            >
+              {item.label}
+            </a>
+          ))}
+          <a
+            href="#contact"
+            onClick={() => setOpen(false)}
+            className="mt-4 block rounded-full bg-[#0A5C36] px-5 py-3 text-center text-sm font-bold text-white"
+          >
+            Get In Touch
+          </a>
+        </div>
+      )}
+    </header>
+  );
+}
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+function HeroSection({ slides, hero, impactStats }) {
+  const [active, setActive] = useState(0);
+  const heroBadge = impactStats.find((stat) => stat.label?.toLowerCase().includes('year')) || impactStats[3] || impactStats[0];
+
+  useEffect(() => {
+    const t = setInterval(() => setActive((p) => (p + 1) % slides.length), 5500);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
+  return (
+    <section id="home" className="relative min-h-screen overflow-hidden">
+      {/* Slide backgrounds */}
+      <div className="absolute inset-0">
+        {slides.map((slide, i) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1200 ${
+              i === active ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <img src={slide.image} alt={slide.title} className="h-full w-full object-cover" />
+          </div>
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#021A0D]/92 via-[#021A0D]/65 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#021A0D]/55 via-transparent to-transparent" />
+      </div>
+
+      {/* Content */}
+      <div className="relative mx-auto max-w-7xl px-5 md:px-10">
+        <div className="flex min-h-screen flex-col justify-center pt-28 pb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-[640px]"
+          >
+            {/* Eyebrow badge */}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#52BD71]/30 bg-[#52BD71]/10 px-4 py-2">
+              <Leaf className="h-3.5 w-3.5 text-[#52BD71]" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+                Eco-Friendly Recycling
+              </span>
+            </div>
+
+            <h1 className="mb-6 text-[clamp(36px,5.5vw,70px)] font-extrabold leading-[1.08] tracking-tight text-white">
+              Building a{' '}
+              <span className="text-[#52BD71]">Sustainable</span>{' '}
+              Future Through Recycling
+            </h1>
+
+            <p className="mb-8 max-w-lg text-[clamp(14px,1.6vw,18px)] leading-relaxed text-white/72">
+              {hero.subtitle}
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4">
+              <a
+                href={hero.primaryCtaHref}
+                className="inline-flex items-center gap-2 rounded-full bg-[#52BD71] px-7 py-3.5 text-[13px] font-bold text-white shadow-lg transition hover:bg-[#3da85e] hover:-translate-y-0.5"
+              >
+                {hero.primaryCtaText}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href={hero.secondaryCtaHref}
+                className="inline-flex items-center gap-2 rounded-full border-2 border-white/40 px-7 py-3.5 text-[13px] font-bold text-white transition hover:border-white hover:bg-white/10"
+              >
+                {hero.secondaryCtaText}
+              </a>
+            </div>
+
+            {/* Trust row */}
+            <div className="mt-10 flex items-center gap-5">
+              <div className="flex -space-x-2.5">
+                {['#52BD71', '#0A5C36', '#f3c623', '#2f9e57'].map((bg, i) => (
+                  <div
+                    key={i}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white"
+                    style={{ background: bg }}
+                  >
+                    {['JM', 'AA', 'BK', 'SO'][i]}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-[#f3c623] text-[#f3c623]" />
+                  ))}
+                </div>
+                <span className="text-xs text-white/65">Trusted by 350+ partners</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Floating badge */}
+          {heroBadge && (
+          <div className="absolute top-36 right-6 hidden max-w-[160px] rounded-2xl border border-white/15 bg-white/10 p-4 text-center backdrop-blur-md md:block">
+            <span className="block text-3xl font-extrabold text-[#52BD71]">{heroBadge.value}</span>
+            <span className="text-[11px] leading-tight text-white/75">
+              {heroBadge.label}
+            </span>
+          </div>
+          )}
+
+          {/* Slide controls */}
+          <div className="absolute bottom-10 right-6 flex items-center gap-3 md:right-10">
+            <button
+              onClick={() => setActive((p) => (p - 1 + slides.length) % slides.length)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="flex gap-1.5">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === active ? 'w-6 bg-[#52BD71]' : 'w-1.5 bg-white/35'
+                  }`}
+                  aria-label={`Slide ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => setActive((p) => (p + 1) % slides.length)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+const STAT_ICONS = [Recycle, Users, MapPin, Award];
+const STAT_COLORS = ['#0A5C36', '#52BD71', '#f3c623', '#0A5C36'];
+
+function StatsSection({ impactStats }) {
+  return (
+    <section className="bg-white py-14">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid grid-cols-2 gap-8 md:grid-cols-4"
+        >
+          {impactStats.map((stat, i) => {
+            const Icon = STAT_ICONS[i % STAT_ICONS.length];
+            const color = STAT_COLORS[i % STAT_COLORS.length];
+            const { raw, suffix } = parseStat(stat.value);
+            return (
+              <motion.div key={i} variants={fadeUp} className="flex flex-col items-center text-center">
+                <div
+                  className="mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+                  style={{ background: `${color}18` }}
+                >
+                  <Icon className="h-6 w-6" style={{ color }} />
+                </div>
+                <div className="mb-1 text-[clamp(28px,3vw,38px)] font-extrabold" style={{ color: '#0A5C36' }}>
+                  <AnimatedCounter raw={raw} suffix={suffix} />
+                </div>
+                <div className="text-sm font-semibold text-[#153426]">{stat.label}</div>
+                <div className="mt-1 text-xs text-[#5d7467]">{stat.detail}</div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── About ────────────────────────────────────────────────────────────────────
+
+const ABOUT_FEATURES = [
+  { icon: Leaf, label: 'Eco-Friendly Operations' },
+  { icon: Recycle, label: 'Full Cycle Recycling' },
+  { icon: ShieldCheck, label: 'Certified & Trusted' },
+];
+
+function AboutSection({ story }) {
+  const { about } = story;
+  return (
+    <section id="about" className="bg-[#F5F7F5] py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid gap-10 md:grid-cols-3"
+        >
+          {/* Image */}
+          <motion.div variants={fadeUp} className="relative">
+            <div className="overflow-hidden rounded-3xl shadow-xl">
+              <img
+                src={about.image}
+                alt={about.title}
+                className="h-[340px] w-full object-cover md:h-[460px]"
+              />
+            </div>
+            <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow-lg backdrop-blur-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0A5C36]">
+                <Play className="ml-0.5 h-4 w-4 text-white" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#153426]">Watch Our Story</div>
+                <div className="text-[10px] text-[#5d7467]">2 min video</div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Text */}
+          <motion.div variants={fadeUp} className="flex flex-col justify-center">
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              {about.eyebrow}
+            </div>
+            <h2 className="mb-5 text-[clamp(26px,3vw,42px)] font-extrabold leading-tight text-[#153426]">
+              {about.title}
+            </h2>
+            <p className="mb-6 leading-relaxed text-[#5d7467]">{about.body}</p>
+            <blockquote className="mb-8 border-l-4 border-[#52BD71] pl-4 text-sm italic text-[#5d7467]">
+              "{about.quote}"
+            </blockquote>
+            <a
+              href="#services"
+              className="inline-flex w-fit items-center gap-2 rounded-full bg-[#0A5C36] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#086b36] hover:-translate-y-0.5"
+            >
+              Explore Our Services <ArrowRight className="h-4 w-4" />
+            </a>
+          </motion.div>
+
+          {/* Feature mini-cards */}
+          <motion.div variants={fadeUp} className="flex flex-col justify-center gap-4">
+            {ABOUT_FEATURES.map(({ icon: Icon, label }, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E8F5ED]">
+                  <Icon className="h-5 w-5 text-[#0A5C36]" />
+                </div>
+                <span className="font-semibold text-[#153426]">{label}</span>
+              </div>
+            ))}
+            <div className="mt-1 rounded-2xl bg-[#0A5C36] p-5 text-white">
+              <div className="mb-1 text-3xl font-extrabold">
+                2,450<span className="text-[#52BD71]">+</span>
+              </div>
+              <div className="text-sm text-white/75">Tons of Plastic Recycled</div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+
+const SERVICE_ICONS = [Truck, Factory, Package, Heart];
+
+function ServicesSection({ services, sections }) {
+  return (
+    <section id="services" className="bg-white py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="mb-14 text-center"
+        >
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            What We Do
+          </div>
+          <h2 className="mb-4 text-[clamp(28px,3.5vw,46px)] font-extrabold text-[#153426]">
+            {sections.servicesTitle}
+          </h2>
+          <div className="mx-auto h-1 w-14 rounded-full bg-[#52BD71]" />
+          <p className="mx-auto mt-5 max-w-xl text-[#5d7467]">{sections.servicesCopy}</p>
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {services.map((service, i) => {
+            const Icon = SERVICE_ICONS[i % SERVICE_ICONS.length];
+            return (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                className="group rounded-3xl border border-black/5 bg-[#F5F7F5] p-6 transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+              >
+                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#E8F5ED] transition duration-300 group-hover:bg-[#0A5C36]">
+                  <Icon className="h-6 w-6 text-[#0A5C36] transition duration-300 group-hover:text-white" />
+                </div>
+                <h3 className="mb-3 text-[15px] font-bold text-[#153426]">{service.name}</h3>
+                <p className="mb-5 text-sm leading-relaxed text-[#5d7467]">{service.description}</p>
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold text-[#0A5C36] transition duration-200 hover:gap-3"
+                >
+                  Learn More <ArrowRight className="h-4 w-4" />
+                </a>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Process ──────────────────────────────────────────────────────────────────
+
+function ProcessSection({ processSteps, sections }) {
+  return (
+    <section id="process" className="bg-[#F5F7F5] py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <div className="grid gap-12 md:grid-cols-2 md:gap-16">
+          {/* Left */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VP}
+            className="flex flex-col justify-center"
+          >
+            <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              How It Works
+            </div>
+            <h2 className="mb-5 text-[clamp(28px,3vw,44px)] font-extrabold leading-tight text-[#153426]">
+              {sections.processTitle}
+            </h2>
+            <p className="mb-8 leading-relaxed text-[#5d7467]">{sections.processCopy}</p>
+            <a
+              href="#contact"
+              className="inline-flex w-fit items-center gap-2 rounded-full bg-[#0A5C36] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#086b36] hover:-translate-y-0.5"
+            >
+              Get Started <ArrowRight className="h-4 w-4" />
+            </a>
+          </motion.div>
+
+          {/* Steps */}
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VP}
+            className="flex flex-col gap-4"
+          >
+            {processSteps.map((step, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0A5C36] text-sm font-extrabold text-white">
+                  {step.step}
+                </div>
+                <div>
+                  <h4 className="mb-1 font-bold text-[#153426]">{step.title}</h4>
+                  <p className="text-sm leading-relaxed text-[#5d7467]">{step.text}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Gallery + Testimonials ───────────────────────────────────────────────────
+
+function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, testimonials }) {
+  const [active, setActive] = useState(0);
+  const [feedback, setFeedback] = useState({ name: '', role: '', text: '', rating: 5 });
+  const [feedbackStatus, setFeedbackStatus] = useState('');
+  const activeTestimonial = testimonials[active] || testimonials[0];
+
+  useEffect(() => {
+    if (active >= testimonials.length) setActive(0);
+  }, [active, testimonials.length]);
+
+  const submitFeedback = async (event) => {
+    event.preventDefault();
+    setFeedbackStatus('sending');
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedback),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Could not save feedback.');
+      onFeedbackAdded(data);
+      setActive(0);
+      setFeedback({ name: '', role: '', text: '', rating: 5 });
+      setFeedbackStatus('saved');
+    } catch (error) {
+      setFeedbackStatus(error.message || 'error');
+    }
+  };
+
+  return (
+    <section id="gallery" className="overflow-hidden">
+      <div className="flex min-h-[560px] flex-col lg:flex-row">
+        {/* Gallery – left */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="flex-1 bg-white p-5 sm:p-8 lg:p-12"
+        >
+          <div className="mb-6">
+            <div className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              Our Work
+            </div>
+            <h2 className="text-[clamp(22px,2.5vw,36px)] font-extrabold text-[#153426]">
+              {sections.galleryTitle}
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {galleryGrid.map((img, i) => (
+              <div key={i} className="overflow-hidden rounded-2xl bg-[#E8F5ED]">
+                <img
+                  src={img.image}
+                  alt={img.title}
+                  className="h-[104px] w-full object-cover transition duration-300 hover:scale-110 sm:h-[120px] lg:h-[130px]"
+                />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Testimonials – right */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="flex flex-1 flex-col justify-center bg-[#021A0D] p-5 sm:p-8 lg:p-12"
+        >
+          <div className="mb-7">
+            <div className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              Testimonials
+            </div>
+            <h2 className="text-[clamp(22px,2.5vw,36px)] font-extrabold text-white">
+              What Our Partners Say
+            </h2>
+          </div>
+
+          {activeTestimonial && (
+          <div>
+            <Quote className="mb-4 h-10 w-10 text-[#52BD71]/35" />
+            <p className="mb-6 max-w-full break-words text-sm leading-relaxed text-white/78 sm:text-base">
+              "{activeTestimonial.text}"
+            </p>
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#52BD71] text-sm font-bold text-white">
+                {activeTestimonial.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join('')}
+              </div>
+              <div className="min-w-0">
+                <div className="break-words font-bold text-white">{activeTestimonial.name}</div>
+                <div className="text-sm text-white/55">{activeTestimonial.role}</div>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className={`h-4 w-4 ${star <= activeTestimonial.rating ? 'fill-[#f3c623] text-[#f3c623]' : 'text-white/25'}`} />
+              ))}
+            </div>
+          </div>
+          )}
+
+          {/* Controls */}
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setActive((p) => (p - 1 + testimonials.length) % testimonials.length)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === active ? 'w-6 bg-[#52BD71]' : 'w-2 bg-white/30'
+                  }`}
+                  aria-label={`Testimonial ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => setActive((p) => (p + 1) % testimonials.length)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <form className="mt-8 grid min-w-0 gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5" onSubmit={submitFeedback}>
+            <div className="text-sm font-bold text-white">Share your feedback</div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input className="min-h-12 min-w-0 rounded-xl border border-white/10 bg-white/10 px-4 text-base text-white outline-none placeholder:text-white/40 focus:border-[#52BD71] sm:text-sm" value={feedback.name} onChange={(event) => setFeedback({ ...feedback, name: event.target.value })} placeholder="Your name" required />
+              <input className="min-h-12 min-w-0 rounded-xl border border-white/10 bg-white/10 px-4 text-base text-white outline-none placeholder:text-white/40 focus:border-[#52BD71] sm:text-sm" value={feedback.role} onChange={(event) => setFeedback({ ...feedback, role: event.target.value })} placeholder="Customer / Partner" />
+            </div>
+            <div className="flex flex-wrap gap-1" aria-label="Rate PlastiGold">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button key={star} className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-white/10" type="button" onClick={() => setFeedback({ ...feedback, rating: star })} aria-label={`${star} star rating`}>
+                  <Star className={`h-6 w-6 ${star <= feedback.rating ? 'fill-[#f3c623] text-[#f3c623]' : 'text-white/30'}`} />
+                </button>
+              ))}
+            </div>
+            <textarea className="min-h-28 min-w-0 resize-y rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-base text-white outline-none placeholder:text-white/40 focus:border-[#52BD71] sm:text-sm" value={feedback.text} onChange={(event) => setFeedback({ ...feedback, text: event.target.value })} placeholder="Write your feedback" required />
+            <button className="min-h-12 rounded-full bg-[#52BD71] px-5 text-sm font-bold text-[#021A0D] transition hover:bg-white disabled:opacity-60" disabled={feedbackStatus === 'sending'} type="submit">
+              {feedbackStatus === 'sending' ? 'Saving...' : 'Submit Feedback'}
+            </button>
+            {feedbackStatus === 'saved' && <p className="text-sm font-semibold text-[#52BD71]">Thank you. Your feedback is now showing.</p>}
+            {feedbackStatus && !['sending', 'saved'].includes(feedbackStatus) && <p className="text-sm font-semibold text-red-300">{feedbackStatus}</p>}
+          </form>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── CTA Banner ───────────────────────────────────────────────────────────────
+
+function CtaBanner({ cta }) {
+  return (
+    <section className="relative overflow-hidden bg-[#0A5C36] py-20">
+      <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/5" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#52BD71]/10" />
+      <div className="pointer-events-none absolute right-1/4 top-4 h-32 w-32 rounded-full border border-white/8" />
+
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+        className="relative mx-auto max-w-3xl px-5 text-center"
+      >
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#52BD71]/30 bg-[#52BD71]/12 px-4 py-2">
+          <Leaf className="h-3.5 w-3.5 text-[#52BD71]" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            Join the Movement
+          </span>
+        </div>
+        <h2 className="mb-5 text-[clamp(28px,4vw,52px)] font-extrabold leading-tight text-white">
+          {cta.title}
+        </h2>
+        <p className="mb-8 text-[clamp(14px,1.5vw,18px)] text-white/70">{cta.copy}</p>
+        <a
+          href={cta.buttonHref}
+          className="inline-flex items-center gap-2 rounded-full border-2 border-white px-8 py-4 text-[15px] font-bold text-white transition hover:bg-white hover:text-[#0A5C36]"
+        >
+          {cta.buttonText} <ArrowRight className="h-4 w-4" />
+        </a>
+      </motion.div>
+    </section>
+  );
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+
+const BLOG_POSTS = [
+  {
+    category: 'Sustainability',
+    date: 'Jan 15, 2026',
+    title: 'How Plastic Recycling is Transforming Kano’s Economy',
+    excerpt:
+      'Discover how PlastiGold is turning waste into economic opportunity while protecting the environment for future generations.',
+    image: '/assets/slide-red-pellets-01.jpeg',
+  },
+  {
+    category: 'Community',
+    date: 'Feb 3, 2026',
+    title: 'Community Recycling Programs: Our 2025 Impact Report',
+    excerpt:
+      'We served 25+ communities this year. Here is what we learned and how we plan to grow further in 2026.',
+    image: '/assets/slide-brown-pellets-01.jpeg',
+  },
+  {
+    category: 'Industry',
+    date: 'Mar 20, 2026',
+    title: 'The Future of Recycled Plastics in Nigerian Manufacturing',
+    excerpt:
+      'Local manufacturers are increasingly turning to recycled materials. PlastiGold is ready to supply at scale.',
+    image: '/assets/slide-dark-pellets-01.jpeg',
+  },
+];
+
+function BlogSection() {
+  return (
+    <section className="bg-[#F5F7F5] py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="mb-14 text-center"
+        >
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            Latest News
+          </div>
+          <h2 className="mb-4 text-[clamp(28px,3.5vw,46px)] font-extrabold text-[#153426]">
+            News &amp; Insights
+          </h2>
+          <div className="mx-auto h-1 w-14 rounded-full bg-[#52BD71]" />
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid gap-6 md:grid-cols-3"
+        >
+          {BLOG_POSTS.map((post, i) => (
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              className="group overflow-hidden rounded-3xl bg-white shadow-sm transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+            >
+              <div className="overflow-hidden">
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  className="h-52 w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="p-6">
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="rounded-full bg-[#E8F5ED] px-3 py-1 text-xs font-bold text-[#0A5C36]">
+                    {post.category}
+                  </span>
+                  <span className="text-xs text-[#5d7467]">{post.date}</span>
+                </div>
+                <h3 className="mb-3 font-bold leading-snug text-[#153426]">{post.title}</h3>
+                <p className="text-sm leading-relaxed text-[#5d7467]">{post.excerpt}</p>
+                <button className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#0A5C36] transition duration-200 hover:gap-3">
+                  Read More <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Contact ──────────────────────────────────────────────────────────────────
+
+function ContactSection({ contact, sections }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [status, setStatus] = useState('idle');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      setStatus(res.ok ? 'sent' : 'error');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  const contactItems = [
+    {
+      icon: MapPin,
+      label: 'Our Address',
+      value: contact.address,
+      href: googleMapsUrlForContact(contact),
+    },
+    {
+      icon: Phone,
+      label: 'Phone',
+      value: contact.phone,
+      href: `tel:${contact.phone}`,
+    },
+    {
+      icon: Mail,
+      label: 'Email',
+      value: contact.email,
+      href: `mailto:${contact.email}`,
+    },
+    {
+      icon: MessageCircle,
+      label: 'WhatsApp',
+      value: 'Chat with us on WhatsApp',
+      href: whatsappUrlForContact(contact),
+    },
+  ];
+
+  const inputCls =
+    'w-full rounded-xl border border-black/10 bg-[#F5F7F5] px-4 py-3 text-sm outline-none transition focus:border-[#52BD71] focus:ring-2 focus:ring-[#52BD71]/20';
+
+  return (
+    <section id="contact" className="bg-white py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="mb-14 text-center"
+        >
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            Get In Touch
+          </div>
+          <h2 className="mb-4 text-[clamp(28px,3.5vw,46px)] font-extrabold text-[#153426]">
+            {sections.contactTitle}
+          </h2>
+          <div className="mx-auto h-1 w-14 rounded-full bg-[#52BD71]" />
+          <p className="mx-auto mt-5 max-w-xl text-[#5d7467]">{sections.contactCopy}</p>
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid gap-10 md:grid-cols-2"
+        >
+          {/* Contact info */}
+          <motion.div variants={fadeUp} className="flex flex-col gap-4">
+            {contactItems.map(({ icon: Icon, label, value, href }, i) => (
+              <a
+                key={i}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-4 rounded-2xl border border-black/5 p-5 transition hover:border-[#52BD71]/40 hover:shadow-sm"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E8F5ED]">
+                  <Icon className="h-5 w-5 text-[#0A5C36]" />
+                </div>
+                <div>
+                  <div className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-[#5d7467]">
+                    {label}
+                  </div>
+                  <div className="text-sm font-semibold text-[#153426]">{value}</div>
+                </div>
+              </a>
+            ))}
+
+            {/* Action buttons */}
+            <div className="mt-2 flex flex-col gap-3">
+              <a
+                href={googleMapsUrlForContact(contact)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#0A5C36] py-3.5 text-sm font-bold text-white transition hover:bg-[#086b36]"
+              >
+                Open Map <MapPin className="h-4 w-4" />
+              </a>
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#c9a34a] py-3.5 text-sm font-bold text-white transition hover:bg-[#b69038]"
+              >
+                Email Us <Mail className="h-4 w-4" />
+              </a>
+            </div>
+
+            {/* Map embed */}
+            <div className="mt-2 overflow-hidden rounded-2xl border border-black/5 shadow-sm">
+              <iframe
+                src={googleMapsEmbedForContact(contact)}
+                width="100%"
+                height="280"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="PlastiGold location"
+              />
+            </div>
+          </motion.div>
+
+          {/* Form */}
+          <motion.div variants={fadeUp}>
+            {status === 'sent' ? (
+              <div className="flex h-full items-center justify-center rounded-3xl bg-[#E8F5ED] p-10 text-center">
+                <div>
+                  <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-[#0A5C36]" />
+                  <h3 className="mb-2 text-lg font-bold text-[#153426]">Message Sent!</h3>
+                  <p className="text-sm text-[#5d7467]">We'll get back to you shortly.</p>
+                  <button
+                    onClick={() => { setStatus('idle'); setForm({ name: '', email: '', phone: '', message: '' }); }}
+                    className="mt-5 text-sm font-bold text-[#0A5C36] hover:underline"
+                  >
+                    Send another message
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col gap-4 rounded-3xl border border-black/5 p-7 shadow-sm"
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-[#153426]">
+                      Full Name *
+                    </label>
+                    <input
+                      required
+                      placeholder="Your name"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-[#153426]">
+                      Email *
+                    </label>
+                    <input
+                      required
+                      type="email"
+                      placeholder="your@email.com"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-[#153426]">
+                    Phone Number
+                  </label>
+                  <input
+                    placeholder="+234 ..."
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-[#153426]">
+                    Message *
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="Tell us about your needs..."
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    className={`${inputCls} resize-none`}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="mt-1 w-full rounded-xl bg-[#0A5C36] py-3.5 text-sm font-bold text-white transition hover:bg-[#086b36] disabled:opacity-60"
+                >
+                  {status === 'sending' ? 'Sending…' : 'Send Message'}
+                </button>
+                {status === 'error' && (
+                  <p className="text-center text-sm text-red-500">
+                    Something went wrong. Please try again.
+                  </p>
+                )}
+              </form>
+            )}
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+const SOCIAL_LINKS = [
+  { key: 'facebook', label: 'Facebook', Icon: Facebook },
+  { key: 'twitter', label: 'Twitter', Icon: Twitter },
+  { key: 'instagram', label: 'Instagram', Icon: Instagram },
+  { key: 'linkedin', label: 'LinkedIn', Icon: Linkedin },
+];
+
+function Footer({ footer, navItems, services, contact }) {
+  const publicNavItems = publicNavigationItems(navItems);
+
+  return (
+    <footer className="bg-[#021A0D] pb-8 pt-16 text-white">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <div className="mb-12 grid gap-10 md:grid-cols-4">
+          {/* Brand */}
+          <div>
+            <a href="#home" className="mb-5 flex items-center" aria-label="PlastiGold Recycling Ltd home">
+              <img
+                className="h-10 w-auto"
+                src="/assets/plastigold-logo.svg"
+                alt="PlastiGold Recycling Ltd"
+              />
+            </a>
+            <p className="mb-5 text-sm leading-relaxed text-white/55">{footer.description}</p>
+            <div className="flex gap-3">
+              {SOCIAL_LINKS.map(({ key, label, Icon }) => (
+                <a
+                  key={key}
+                  href={footer.socialLinks?.[key] || '#'}
+                  target={footer.socialLinks?.[key]?.startsWith('http') ? '_blank' : undefined}
+                  rel={footer.socialLinks?.[key]?.startsWith('http') ? 'noreferrer' : undefined}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/65 transition hover:bg-[#52BD71] hover:text-white"
+                  aria-label={label}
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div>
+            <h4 className="mb-5 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              Quick Links
+            </h4>
+            <ul className="space-y-3">
+              {publicNavItems.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="text-sm text-white/55 transition hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h4 className="mb-5 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              Services
+            </h4>
+            <ul className="space-y-3">
+              {services.map((s, i) => (
+                <li key={i}>
+                  <a
+                    href="#services"
+                    className="text-sm text-white/55 transition hover:text-white"
+                  >
+                    {s.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="mb-5 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+              Contact
+            </h4>
+            <ul className="space-y-3.5">
+              <li className="flex items-start gap-2.5 text-sm text-white/55">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#52BD71]" />
+                {contact.address}
+              </li>
+              <li>
+                <a
+                  href={`tel:${contact.phone}`}
+                  className="flex items-center gap-2.5 text-sm text-white/55 transition hover:text-white"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-[#52BD71]" />
+                  {contact.phone}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="flex items-center gap-2.5 text-sm text-white/55 transition hover:text-white"
+                >
+                  <Mail className="h-4 w-4 shrink-0 text-[#52BD71]" />
+                  {contact.email}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 pt-8 text-center">
+          <p className="text-sm text-white/38">{footer.copyright}</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Page root ────────────────────────────────────────────────────────────────
+
+export default function HomePage({ initialContent }) {
+  const { content, setContent } = useContent(initialContent);
+
+  const slides = content.slides?.length ? content.slides : defaultContent.slides;
+  const gallery = content.gallery?.length ? content.gallery : defaultContent.gallery;
   const story = content.story || defaultContent.story;
   const contact = content.contact || defaultContent.contact;
-  const activeImage = slides[activeSlide] || slides[0];
-  const galleryGrid = [...galleryImages, ...slides].slice(0, 6);
+  const hero = content.hero || defaultContent.hero;
+  const cta = content.cta || defaultContent.cta;
+  const navItems = content.navItems?.length ? content.navItems : defaultContent.navItems;
+  const impactStats = content.impactStats?.length ? content.impactStats : defaultContent.impactStats;
+  const services = content.services?.length ? content.services : defaultContent.services;
+  const processSteps = content.processSteps?.length ? content.processSteps : defaultContent.processSteps;
+  const sections = content.sections || defaultContent.sections;
+  const footer = content.footer || defaultContent.footer;
+  const testimonials = content.testimonials?.length ? content.testimonials : defaultContent.testimonials;
+
+  const galleryGrid = [...gallery, ...slides].slice(0, 6);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -49,461 +1247,35 @@ export default function HomePage() {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveSlide((index) => (index + 1) % slides.length);
-    }, 5200);
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
-
-  useEffect(() => {
-    if (activeSlide >= slides.length) setActiveSlide(0);
-  }, [activeSlide, slides.length]);
-
-  const goToSlide = (direction) => {
-    setActiveSlide((index) => (index + direction + slides.length) % slides.length);
-  };
-
   return (
-    <>
-      <main className="overflow-x-hidden bg-white text-[#13251b]">
-        <div className={pageShell}>
-          <HeroCard
-            activeImage={activeImage}
-            activeSlide={activeSlide}
-            content={content}
-            error={error}
-            goToSlide={goToSlide}
-            heroFeatures={content.heroFeatures}
-            navItems={content.navItems}
-            setActiveSlide={setActiveSlide}
-            slides={slides}
-          />
+    <div className="min-h-screen">
+      <Navbar navItems={navItems} />
+      <HeroSection slides={slides} hero={hero} impactStats={impactStats} />
+      <StatsSection impactStats={impactStats} />
+      <AboutSection story={story} />
+      <ServicesSection services={services} sections={sections} />
+      <ProcessSection processSteps={processSteps} sections={sections} />
+      <GalleryTestimonialsSection
+        galleryGrid={galleryGrid}
+        sections={sections}
+        testimonials={testimonials}
+        onFeedbackAdded={(testimonial) => setContent((current) => ({ ...current, testimonials: [testimonial, ...(current.testimonials || [])] }))}
+      />
+      <CtaBanner cta={cta} />
+      <BlogSection />
+      <ContactSection contact={contact} sections={sections} />
+      <Footer footer={footer} navItems={navItems} services={services} contact={contact} />
 
-          <div className="grid gap-6">
-            <ImpactSection sections={content.sections} stats={content.impactStats} />
-            <AboutSection story={story} />
-          </div>
-
-          <ServicesSection sections={content.sections} services={content.services} />
-          <ProcessSection sections={content.sections} steps={content.processSteps} />
-          <GallerySection galleryGrid={galleryGrid} loading={loading} sections={content.sections} />
-          <WhySection sections={content.sections} whyCards={content.whyCards} />
-          <CtaSection cta={content.cta} story={story} />
-          <ContactSection contact={contact} sections={content.sections} />
-          <Footer contact={contact} footer={content.footer} navItems={content.navItems} services={content.services} />
-        </div>
-      </main>
-
-      <a className="fixed bottom-6 right-6 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25d366] text-white shadow-xl transition hover:-translate-y-1" href={whatsappUrlForContact(contact)} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp">
-        <MessageCircle size={26} />
+      {/* WhatsApp FAB */}
+      <a
+        href={whatsappUrlForContact(contact)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-xl transition hover:scale-110"
+        aria-label="Chat on WhatsApp"
+      >
+        <MessageCircle className="h-6 w-6 text-white" />
       </a>
-    </>
-  );
-}
-
-function HeroCard({ activeImage, activeSlide, content, error, goToSlide, heroFeatures, navItems, setActiveSlide, slides }) {
-  const featureIcons = [Leaf, Recycle, MapPin];
-
-  return (
-    <section id="home" className="relative min-h-[700px] overflow-hidden bg-[#031d14] px-[clamp(20px,5vw,72px)] py-6 text-white md:py-8 xl:min-h-[820px]">
-      <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={activeImage.image} alt={activeImage.title} />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,23,15,0.96)_0%,rgba(2,30,20,0.88)_42%,rgba(2,23,15,0.34)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(201,163,74,0.24),transparent_34%)]" />
-
-      <div className="relative z-10 flex min-h-[620px] flex-col md:min-h-[700px]">
-        <HeroNav navItems={navItems} />
-
-        <div className="flex flex-1 items-center py-16 md:py-20">
-          <div className="max-w-3xl">
-            <p className="mb-5 text-sm font-bold text-white/80">{content.hero.title}</p>
-            <HeroTitle text={content.hero.tagline} />
-            <p className="mt-6 max-w-xl text-base leading-8 text-white/82">{content.hero.subtitle}</p>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <a className={primaryButton} href={content.hero.primaryCtaHref}>{content.hero.primaryCtaText}</a>
-              <a className={outlineButton} href={content.hero.secondaryCtaHref}>{content.hero.secondaryCtaText}</a>
-            </div>
-            {error && <p className="mt-4 text-sm font-semibold text-white/70">Using saved website placeholders until content loads.</p>}
-          </div>
-        </div>
-
-        <div className="grid gap-4 border-t border-white/12 pt-6 sm:grid-cols-3">
-          {(heroFeatures || defaultContent.heroFeatures).slice(0, 3).map((feature, index) => (
-            <HeroFeature icon={featureIcons[index % featureIcons.length]} key={`${feature.title}-${index}`} title={feature.title} text={feature.text} />
-          ))}
-        </div>
-
-        <div className="absolute bottom-6 right-6 flex items-center gap-2">
-          <button className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur transition hover:bg-white hover:text-[#083d29]" onClick={() => goToSlide(-1)} aria-label="Previous slide"><ChevronLeft size={18} /></button>
-          <div className="hidden items-center gap-2 sm:flex">
-            {slides.slice(0, 7).map((slide, index) => (
-              <button
-                className={`h-2 rounded-full transition-all ${index === activeSlide ? 'w-8 bg-[#c9a34a]' : 'w-2 bg-white/45'}`}
-                onClick={() => setActiveSlide(index)}
-                aria-label={`Show ${slide.title}`}
-                key={`dot-${slide.id || slide.title}`}
-              />
-            ))}
-          </div>
-          <button className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur transition hover:bg-white hover:text-[#083d29]" onClick={() => goToSlide(1)} aria-label="Next slide"><ChevronRight size={18} /></button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HeroNav({ navItems }) {
-  const [open, setOpen] = useState(false);
-  const heroLinks = (navItems || defaultContent.navItems).filter((item) => item.href !== '/admin');
-
-  return (
-    <div className="relative z-20 flex items-center justify-between gap-5">
-      <a className="inline-flex rounded-md bg-white/96 p-1.5 shadow-sm" href="#home" aria-label="PlastiGold Recycling Ltd home">
-        <img className="h-12 w-auto" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd logo" />
-      </a>
-      <button className="grid h-11 w-11 place-items-center rounded-md border border-white/15 bg-white/10 text-white lg:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu">
-        {open ? <X size={22} /> : <Menu size={22} />}
-      </button>
-      <nav className={`${open ? 'grid' : 'hidden'} absolute left-0 right-0 top-16 gap-1 rounded-lg border border-white/15 bg-[#062819]/95 p-3 shadow-2xl backdrop-blur lg:static lg:flex lg:items-center lg:bg-transparent lg:p-0 lg:shadow-none lg:border-0`} aria-label="Primary navigation">
-        {heroLinks.map((item) => (
-          <a className="rounded-md px-3 py-2 text-sm font-bold text-white/86 transition hover:bg-white/10 hover:text-white" key={item.href} href={item.href} onClick={() => setOpen(false)}>
-            {item.label.replace('About Us', 'About')}
-          </a>
-        ))}
-        <a className="rounded-md bg-[#c9a34a] px-5 py-3 text-sm font-black text-white transition hover:bg-[#b69038] lg:ml-5" href="/admin" onClick={() => setOpen(false)}>
-          Admin
-        </a>
-      </nav>
     </div>
   );
-}
-
-function HeroTitle({ text }) {
-  const source = text || 'Turning Plastic Waste Into Sustainable Value';
-  const match = source.match(/^(.*?)(Sustainable Value|Better Future|Industrial Value)$/i);
-
-  if (!match) {
-    return <h1 className="text-[clamp(2.9rem,5.8vw,5.75rem)] font-black leading-[1.02] tracking-tight">{source}</h1>;
-  }
-
-  return (
-    <h1 className="text-[clamp(2.9rem,5.8vw,5.75rem)] font-black leading-[1.02] tracking-tight">
-      {match[1]}
-      <span className="text-[#69a94d]">{match[2]}</span>
-    </h1>
-  );
-}
-
-function HeroFeature({ icon: Icon, title, text }) {
-  return (
-    <div className="flex items-center gap-4">
-      <span className="grid h-12 w-12 flex-none place-items-center rounded-full border border-[#69a94d]/40 bg-[#0a7a3e]/35 text-[#8ed46d]">
-        <Icon size={23} />
-      </span>
-      <div>
-        <strong className="block text-sm">{title}</strong>
-        <span className="text-xs text-white/70">{text}</span>
-      </div>
-    </div>
-  );
-}
-
-function ImpactSection({ sections, stats }) {
-  return (
-    <section id="impact" className={`${sectionCard} ${sectionPad}`}>
-      <CenteredTitle icon={Leaf} title={sections.impactTitle} copy={sections.impactCopy} />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <ImpactCard index={index} key={stat.label} stat={stat} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ImpactCard({ index, stat }) {
-  const icons = [Recycle, Factory, Leaf, ShieldCheck];
-  const Icon = icons[index % icons.length];
-
-  return (
-    <article className="rounded-lg border border-black/8 bg-white p-5 text-center shadow-[0_10px_28px_rgba(17,24,39,0.08)] transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(17,24,39,0.12)]">
-      <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-[#1f7f37] text-white">
-        <Icon size={19} />
-      </span>
-      <strong className="mt-4 block text-3xl font-black text-[#083d29]">{stat.value}</strong>
-      <span className="mt-1 block text-sm leading-5 text-[#1d3025]">{stat.label}</span>
-    </article>
-  );
-}
-
-function AboutSection({ story }) {
-  return (
-    <section id="about" className={`${sectionCard} ${sectionPad} grid gap-10 md:items-center lg:grid-cols-[0.9fr_1.1fr]`}>
-      <img className="aspect-[1.08] w-full rounded-lg object-cover" src={story.about.image} alt={story.about.title} loading="lazy" decoding="async" />
-      <div>
-        {story.about.eyebrow && <p className="mb-4 text-sm font-black uppercase tracking-[0.16em] text-[#1f7f37]">{story.about.eyebrow}</p>}
-        <h2 className="text-[clamp(2rem,3.2vw,3.5rem)] font-black leading-tight text-[#0e2118]">
-          <StoryTitle title={story.about.title} highlight={story.about.highlight} />
-        </h2>
-        <div className="mt-4 grid gap-3">
-          <Paragraphs className="text-sm leading-7 text-[#334439]" text={story.about.body} />
-        </div>
-        {story.about.quote && (
-          <blockquote className="mt-6 border-l-4 border-[#c9a34a] bg-[#f8faf4] px-5 py-4 text-sm font-bold leading-7 text-[#334439]">
-            {story.about.quote}
-          </blockquote>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function ServicesSection({ sections, services }) {
-  return (
-    <section id="services" className={`${sectionCard} ${sectionPad}`}>
-      <CenteredTitle title={sections.servicesTitle} copy={sections.servicesCopy} />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {services.map((service, index) => (
-          <ServiceCard index={index} key={service.name} service={service} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ServiceCard({ index, service }) {
-  const icons = [Recycle, Factory, Leaf, ShieldCheck];
-  const Icon = icons[index % icons.length];
-
-  return (
-    <article className="group overflow-hidden rounded-lg border border-black/8 bg-white shadow-[0_10px_26px_rgba(17,24,39,0.08)] transition hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(17,24,39,0.13)]">
-      <div className="relative">
-        <img className="aspect-[1.6] w-full object-cover transition duration-300 group-hover:scale-[1.04]" src={service.image} alt={service.name} loading="lazy" decoding="async" />
-        <span className="absolute -bottom-5 left-5 grid h-11 w-11 place-items-center rounded-full border-4 border-white bg-[#1f7f37] text-white">
-          <Icon size={18} />
-        </span>
-      </div>
-      <div className="px-5 pb-5 pt-8">
-        <h3 className="text-lg font-black text-[#0e2118]">{service.name}</h3>
-        <p className="mt-3 min-h-20 text-sm leading-6 text-[#4f5f55]">{service.description}</p>
-        <a className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#0a7a3e] transition hover:gap-3" href="#contact">
-          Learn More <ArrowRight size={15} />
-        </a>
-      </div>
-    </article>
-  );
-}
-
-function ProcessSection({ sections, steps }) {
-  return (
-    <section id="process" className={`${sectionPad} bg-[radial-gradient(circle_at_50%_0%,rgba(92,149,62,0.38),transparent_34%),linear-gradient(135deg,#073a27_0%,#021b13_100%)] text-white`}>
-      <CenteredTitle dark title={sections.processTitle} copy={sections.processCopy} />
-      <ol className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-5">
-        {steps.map((step, index) => (
-          <li className="relative text-center" key={step.step}>
-            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#2d8b3c] text-white shadow-[0_0_0_10px_rgba(255,255,255,0.06)]">
-              <Recycle size={24} />
-            </span>
-            <strong className="mt-5 block text-lg">{step.title}</strong>
-            <p className="mx-auto mt-3 max-w-[170px] text-xs leading-6 text-white/72">{step.text}</p>
-            <span className="mx-auto mt-4 grid h-7 w-7 place-items-center rounded-full bg-white text-xs font-black text-[#083d29]">{index + 1}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-function GallerySection({ galleryGrid, loading, sections }) {
-  return (
-    <section id="gallery" className={`${sectionCard} ${sectionPad}`}>
-      <CenteredTitle title={sections.galleryTitle} copy={sections.galleryCopy} />
-      {loading && <p className="mt-3 text-center text-sm text-[#66736a]">Loading latest images...</p>}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {galleryGrid.map((image, index) => (
-          <figure className="group overflow-hidden rounded-lg bg-[#eef1ed]" key={`${image.id || image.image}-${index}`}>
-            <img className="aspect-[1.55] w-full object-cover transition duration-300 group-hover:scale-[1.04]" src={image.image} alt={image.title} loading="lazy" decoding="async" />
-          </figure>
-        ))}
-      </div>
-      <div className="mt-7 text-center">
-        <a className={primaryButton} href="#contact">View More Photos</a>
-      </div>
-    </section>
-  );
-}
-
-function WhySection({ sections, whyCards }) {
-  return (
-    <section className={`${sectionCard} ${sectionPad}`}>
-      <CenteredTitle title={sections.whyTitle} copy={sections.whyCopy} />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {whyCards.map((card) => (
-          <WhyCard card={card} key={card.title} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function WhyCard({ card }) {
-  const icons = [ShieldCheck, MapPin, Leaf, CheckCircle2];
-  const Icon = card.icon || icons[Math.abs(card.title?.length || 0) % icons.length];
-
-  return (
-    <article className="rounded-lg border border-black/8 bg-white p-5 text-center shadow-[0_10px_26px_rgba(17,24,39,0.08)] transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(17,24,39,0.12)]">
-      <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-[#1f7f37]/25 bg-[#f5fbf4] text-[#1f7f37]">
-        <Icon size={20} />
-      </span>
-      <h3 className="mt-5 text-sm font-black text-[#0e2118]">{card.title}</h3>
-      <p className="mt-3 text-xs leading-6 text-[#5d6a61]">{card.text}</p>
-    </article>
-  );
-}
-
-function CtaSection({ cta, story }) {
-  const image = cta.image || story.about.image;
-
-  return (
-    <section id="partners" className={`relative min-h-[360px] overflow-hidden bg-[#063520] ${sectionPad} text-white`}>
-      <img className="absolute inset-0 h-full w-full object-cover opacity-36" src={image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,45,28,0.96),rgba(4,45,28,0.72),rgba(4,45,28,0.38))]" />
-      <div className="relative z-10 max-w-2xl">
-        <h2 className="text-[clamp(2rem,3.8vw,3.8rem)] font-black leading-tight">{cta.title}</h2>
-        <p className="mt-4 max-w-lg leading-8 text-white/78">{cta.copy}</p>
-        <a className={`${goldButton} mt-8`} href={cta.buttonHref}>{cta.buttonText} <ArrowRight size={17} /></a>
-      </div>
-    </section>
-  );
-}
-
-function ContactSection({ contact, sections }) {
-  return (
-    <section id="contact" className={`${sectionCard} ${sectionPad} grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center`}>
-      <div>
-        <CenteredTitle title={sections.contactTitle} copy={sections.contactCopy} />
-        <div className="mt-8 grid gap-4 text-[#4f5f55]">
-          <ContactLine icon={MapPin} text={contact.address} />
-          <ContactLine icon={Phone} text={[contact.phone, contact.secondaryPhone].filter(Boolean).join(', ')} />
-          <ContactLine icon={Mail} text={contact.email} />
-        </div>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <a className={primaryButton} href={googleMapsUrlForContact(contact)} target="_blank" rel="noreferrer">Open Map <MapPin size={17} /></a>
-          <a className={goldButton} href={`mailto:${contact.email}`}>Email Us <Mail size={17} /></a>
-        </div>
-      </div>
-      <iframe className="min-h-[360px] w-full rounded-lg border-0 shadow-[0_14px_45px_rgba(17,24,39,0.10)] md:min-h-[460px]" title="PlastiGold location map" loading="lazy" src={googleMapsEmbedForContact(contact)} />
-    </section>
-  );
-}
-
-function ContactLine({ icon: Icon, text }) {
-  return (
-    <div className="flex items-start gap-3">
-      <Icon className="mt-0.5 flex-none text-[#1f7f37]" size={18} />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function Footer({ contact, footer, navItems, services }) {
-  return (
-    <footer className="bg-[linear-gradient(135deg,#062819_0%,#02140e_100%)] px-[clamp(20px,5vw,72px)] py-12 text-white md:py-16">
-      <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.9fr_1fr]">
-        <div>
-          <img className="h-14 w-auto rounded-md bg-white p-1.5" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
-          <p className="mt-6 text-sm leading-7 text-white/70">{footer.description}</p>
-        </div>
-        <FooterLinks title="Quick Links" items={navItems.slice(0, 6)} />
-        <div>
-          <h3 className="font-black">Our Services</h3>
-          <div className="mt-5 grid gap-3 text-sm text-white/70">
-            {services.map((service) => (
-              <a className="transition hover:text-[#c9a34a]" href="#services" key={service.name}>{service.name}</a>
-            ))}
-          </div>
-        </div>
-        <div>
-          <h3 className="font-black">Contact Us</h3>
-          <div className="mt-5 grid gap-4 text-sm text-white/70">
-            <FooterContact icon={MapPin} text={contact.city || contact.address} />
-            <FooterContact icon={Phone} text={contact.phone} />
-            <FooterContact icon={Mail} text={contact.email} />
-            <a className={`${goldButton} mt-2 w-fit`} href={googleMapsUrlForContact(contact)} target="_blank" rel="noreferrer">Open Map</a>
-          </div>
-        </div>
-      </div>
-      <div className="mt-10 border-t border-white/10 pt-6 text-sm text-white/50">
-        {footer.copyright}
-      </div>
-    </footer>
-  );
-}
-
-function FooterLinks({ items, title }) {
-  return (
-    <div>
-      <h3 className="font-black">{title}</h3>
-      <div className="mt-5 grid gap-3 text-sm text-white/70">
-        {items.map((item) => (
-          <a className="transition hover:text-[#c9a34a]" href={item.href} key={item.href}>{item.label}</a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FooterContact({ icon: Icon, text }) {
-  return (
-    <div className="flex items-start gap-3">
-      <Icon className="mt-0.5 flex-none text-[#c9a34a]" size={16} />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function CenteredTitle({ copy, dark = false, icon: Icon, title }) {
-  return (
-    <div className="mx-auto max-w-2xl text-center">
-      {Icon && (
-        <span className={`mx-auto mb-2 grid h-8 w-8 place-items-center rounded-full ${dark ? 'bg-white/10 text-[#c9a34a]' : 'bg-[#f0f8ed] text-[#1f7f37]'}`}>
-          <Icon size={16} />
-        </span>
-      )}
-      <h2 className={`text-[clamp(1.9rem,3vw,3rem)] font-black leading-tight ${dark ? 'text-white' : 'text-[#0e2118]'}`}>{title}</h2>
-      <span className="mx-auto mt-3 block h-0.5 w-12 bg-[#c9a34a]" />
-      {copy && <p className={`mx-auto mt-4 max-w-xl text-sm leading-7 ${dark ? 'text-white/70' : 'text-[#5d6a61]'}`}>{copy}</p>}
-    </div>
-  );
-}
-
-function StoryTitle({ highlight, title }) {
-  if (!highlight || !title?.toLowerCase().includes(highlight.toLowerCase())) {
-    return title;
-  }
-
-  const start = title.toLowerCase().indexOf(highlight.toLowerCase());
-  const before = title.slice(0, start);
-  const match = title.slice(start, start + highlight.length);
-  const after = title.slice(start + highlight.length);
-
-  return (
-    <>
-      {before}
-      <span className="text-[#69a94d]">{match}</span>
-      {after}
-    </>
-  );
-}
-
-function Paragraphs({ className, limit, text }) {
-  return String(text || '')
-    .split('\n')
-    .filter(Boolean)
-    .slice(0, limit || undefined)
-    .map((paragraph) => (
-      <p className={className} key={paragraph}>
-        {paragraph}
-      </p>
-    ));
 }

@@ -75,6 +75,12 @@ const navItems = [
   { label: 'Contact', href: '#contact' },
 ];
 
+const customerNavItems = navItems.filter((item) => {
+  const label = item.label?.trim().toLowerCase();
+  const href = item.href?.trim().toLowerCase();
+  return label !== 'admin' && href !== '/admin' && href !== '/pg-internal-console';
+});
+
 const products = [
   {
     name: 'HDPE Regrind',
@@ -151,14 +157,11 @@ function Navbar() {
         {open ? <X size={22} /> : <Menu size={22} />}
       </button>
       <nav className={open ? 'nav-links open' : 'nav-links'} aria-label="Primary navigation">
-        {navItems.map((item) => (
+        {customerNavItems.map((item) => (
           <a key={item.href} href={item.href} onClick={() => setOpen(false)}>
             {item.label}
           </a>
         ))}
-        <a className="admin-link" href="/admin">
-          Admin
-        </a>
       </nav>
     </header>
   );
@@ -755,7 +758,7 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
 
 function App() {
   const path = window.location.pathname;
-  return path.startsWith('/admin') ? <AdminPage /> : <HomePage />;
+  return path.startsWith('/pg-internal-console') ? <AdminPage /> : <HomePage />;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
