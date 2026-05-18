@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { apiRequest } from './api';
 import { defaultContent, mergeContent } from './siteData';
 
-export default function useContent() {
-  const [content, setContent] = useState(defaultContent);
+export default function useContent(initialContent = defaultContent) {
+  const [content, setContent] = useState(() => mergeContent(initialContent));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
