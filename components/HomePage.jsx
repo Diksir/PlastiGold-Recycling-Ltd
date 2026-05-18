@@ -98,7 +98,7 @@ function parseStat(value) {
 }
 
 function publicNavigationItems(navItems = []) {
-  return navItems.filter((item) => {
+  return (Array.isArray(navItems) ? navItems : []).filter((item) => {
     const label = item.label?.trim().toLowerCase();
     const href = item.href?.trim().toLowerCase();
     return label !== 'admin' && href !== '/admin' && href !== '/pg-internal-console';
@@ -214,8 +214,8 @@ function Navbar({ navItems }) {
 
 function HeroSection({ slides, hero, impactStats }) {
   const [active, setActive] = useState(0);
-  const safeSlides = slides.length ? slides : defaultContent.slides;
-  const safeImpactStats = impactStats.length ? impactStats : defaultContent.impactStats;
+  const safeSlides = Array.isArray(slides) && slides.length ? slides : defaultContent.slides;
+  const safeImpactStats = Array.isArray(impactStats) && impactStats.length ? impactStats : defaultContent.impactStats;
   const heroBadge = safeImpactStats.find((stat) => stat.label?.toLowerCase().includes('year')) || safeImpactStats[3] || safeImpactStats[0];
 
   useEffect(() => {
@@ -608,7 +608,8 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
   const [active, setActive] = useState(0);
   const [feedback, setFeedback] = useState({ name: '', role: '', text: '', rating: 5 });
   const [feedbackStatus, setFeedbackStatus] = useState('');
-  const safeTestimonials = testimonials.length ? testimonials : defaultContent.testimonials;
+  const safeGalleryGrid = Array.isArray(galleryGrid) && galleryGrid.length ? galleryGrid : defaultContent.gallery;
+  const safeTestimonials = Array.isArray(testimonials) && testimonials.length ? testimonials : defaultContent.testimonials;
   const activeTestimonial = safeTestimonials[active] || safeTestimonials[0];
 
   useEffect(() => {
@@ -655,7 +656,7 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {galleryGrid.map((img, i) => (
+            {safeGalleryGrid.map((img, i) => (
               <div key={i} className="overflow-hidden rounded-2xl bg-[#E8F5ED]">
                 <img
                   src={img.image}
