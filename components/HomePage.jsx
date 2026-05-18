@@ -122,6 +122,14 @@ function testimonialInitials(name) {
   return initials || 'G';
 }
 
+function arrayWithFallback(value, fallback) {
+  return Array.isArray(value) && value.length ? value : fallback;
+}
+
+function firstArrayItem(value) {
+  return Array.isArray(value) ? value.find(() => true) : undefined;
+}
+
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
 function Navbar({ navItems }) {
@@ -216,7 +224,10 @@ function HeroSection({ slides, hero, impactStats }) {
   const [active, setActive] = useState(0);
   const safeSlides = Array.isArray(slides) && slides.length ? slides : defaultContent.slides;
   const safeImpactStats = Array.isArray(impactStats) && impactStats.length ? impactStats : defaultContent.impactStats;
-  const heroBadge = safeImpactStats.find((stat) => stat.label?.toLowerCase().includes('year')) || safeImpactStats[3] || safeImpactStats[0];
+  const heroBadge =
+    safeImpactStats.find((stat) => stat.label?.toLowerCase().includes('year')) ||
+    safeImpactStats.find((_, index) => index === 3) ||
+    firstArrayItem(safeImpactStats);
 
   useEffect(() => {
     const t = setInterval(() => setActive((p) => wrapIndex(p + 1, safeSlides.length)), 5500);
@@ -288,13 +299,18 @@ function HeroSection({ slides, hero, impactStats }) {
             {/* Trust row */}
             <div className="mt-10 flex items-center gap-5">
               <div className="flex -space-x-2.5">
-                {['#52BD71', '#0A5C36', '#f3c623', '#2f9e57'].map((bg, i) => (
+                {[
+                  { bg: '#52BD71', initials: 'JM' },
+                  { bg: '#0A5C36', initials: 'AA' },
+                  { bg: '#f3c623', initials: 'BK' },
+                  { bg: '#2f9e57', initials: 'SO' },
+                ].map(({ bg, initials }) => (
                   <div
-                    key={i}
+                    key={initials}
                     className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white"
                     style={{ background: bg }}
                   >
-                    {['JM', 'AA', 'BK', 'SO'][i]}
+                    {initials}
                   </div>
                 ))}
               </div>
@@ -610,7 +626,8 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
   const [feedbackStatus, setFeedbackStatus] = useState('');
   const safeGalleryGrid = Array.isArray(galleryGrid) && galleryGrid.length ? galleryGrid : defaultContent.gallery;
   const safeTestimonials = Array.isArray(testimonials) && testimonials.length ? testimonials : defaultContent.testimonials;
-  const activeTestimonial = safeTestimonials[active] || safeTestimonials[0];
+  const activeTestimonial =
+    safeTestimonials.find((_, index) => index === active) || firstArrayItem(safeTestimonials);
 
   useEffect(() => {
     if (active >= safeTestimonials.length) setActive(0);
@@ -1242,19 +1259,19 @@ function Footer({ footer, navItems, services, contact }) {
 export default function HomePage({ initialContent }) {
   const { content, setContent } = useContent(initialContent);
 
-  const slides = content.slides?.length ? content.slides : defaultContent.slides;
-  const gallery = content.gallery?.length ? content.gallery : defaultContent.gallery;
+  const slides = arrayWithFallback(content.slides, defaultContent.slides);
+  const gallery = arrayWithFallback(content.gallery, defaultContent.gallery);
   const story = content.story || defaultContent.story;
   const contact = content.contact || defaultContent.contact;
   const hero = content.hero || defaultContent.hero;
   const cta = content.cta || defaultContent.cta;
-  const navItems = content.navItems?.length ? content.navItems : defaultContent.navItems;
-  const impactStats = content.impactStats?.length ? content.impactStats : defaultContent.impactStats;
-  const services = content.services?.length ? content.services : defaultContent.services;
-  const processSteps = content.processSteps?.length ? content.processSteps : defaultContent.processSteps;
+  const navItems = arrayWithFallback(content.navItems, defaultContent.navItems);
+  const impactStats = arrayWithFallback(content.impactStats, defaultContent.impactStats);
+  const services = arrayWithFallback(content.services, defaultContent.services);
+  const processSteps = arrayWithFallback(content.processSteps, defaultContent.processSteps);
   const sections = content.sections || defaultContent.sections;
   const footer = content.footer || defaultContent.footer;
-  const testimonials = content.testimonials?.length ? content.testimonials : defaultContent.testimonials;
+  const testimonials = arrayWithFallback(content.testimonials, defaultContent.testimonials);
 
   const galleryGrid = [...gallery, ...slides].slice(0, 6);
 
