@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, ImagePlus, LogOut, MapPin, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { apiRequest, authHeaders } from './api';
 import { defaultContent, googleMapsEmbedForContact, tokenKey } from './siteData';
@@ -607,11 +607,17 @@ function EditableList({ fields, items, listName, newItem, onAdd, onRemove, onUpd
 
 function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
   const [file, setFile] = useState(null);
+  const inputRef = useRef(null);
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
 
   useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
 
   const upload = async () => {
+    if (!file) {
+      inputRef.current?.click();
+      return;
+    }
+
     const url = await onUpload(file);
     if (url) {
       onChange(url);
@@ -625,10 +631,10 @@ function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
       <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
         <Upload size={20} />
         <span className="min-w-0 truncate">{file ? file.name : label}</span>
-        <input className="hidden" type="file" accept={accept} onChange={(event) => setFile(event.target.files?.[0] || null)} />
+        <input ref={inputRef} className="hidden" type="file" accept={accept} onChange={(event) => setFile(event.target.files?.[0] || null)} />
       </label>
-      <button className={secondaryButton} onClick={upload} type="button" disabled={!file || busy}>
-        Upload Media
+      <button className={secondaryButton} onClick={upload} type="button" disabled={busy}>
+        {file ? 'Upload Media' : 'Choose Media'}
       </button>
     </div>
   );
