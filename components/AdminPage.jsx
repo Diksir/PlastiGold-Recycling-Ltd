@@ -894,6 +894,7 @@ function SlideAdminItem({ slide, index, total, busy, onMove, onSave, onDelete })
 function GalleryAdminItem({ item, busy, onSave, onDelete }) {
   const [draft, setDraft] = useState({ title: item.title, caption: item.caption || '' });
   const [imageFile, setImageFile] = useState(null);
+  const [status, setStatus] = useState('');
   const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : ''), [imageFile]);
 
   useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
@@ -904,6 +905,7 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
 
   useEffect(() => {
     setImageFile(null);
+    setStatus('');
   }, [item.image]);
 
   const saveGalleryItem = async () => {
@@ -911,8 +913,14 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
     formData.append('title', draft.title);
     formData.append('caption', draft.caption);
     if (imageFile) formData.append('image', imageFile);
+    setStatus(imageFile ? 'Saving new image...' : 'Saving text...');
     const savedItem = await onSave(formData);
-    if (savedItem) setImageFile(null);
+    if (savedItem) {
+      setImageFile(null);
+      setStatus('Saved. This image is now published.');
+    } else {
+      setStatus('Save failed. Try again.');
+    }
   };
 
   return (
@@ -922,7 +930,16 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
         <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
           <Upload size={20} />
           <span className="min-w-0 truncate">{imageFile ? imageFile.name : 'Replace gallery image'}</span>
-          <input className="hidden" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
+          <input
+            className="hidden"
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const nextFile = event.target.files?.[0] || null;
+              setImageFile(nextFile);
+              setStatus(nextFile ? 'New image selected. Click Save Changes to publish it.' : '');
+            }}
+          />
         </label>
       </div>
       <div className="grid min-w-0 gap-4 p-4">
@@ -938,6 +955,7 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
           <button className={`${secondaryButton} flex-1`} disabled={busy} onClick={saveGalleryItem}>Save Changes <Save size={18} /></button>
           <button className={`${iconButton} text-red-700`} disabled={busy} onClick={onDelete} aria-label="Delete gallery image"><Trash2 size={18} /></button>
         </div>
+        {status && <p className="text-sm font-black text-[#5A7C2E]">{status}</p>}
       </div>
     </article>
   );
