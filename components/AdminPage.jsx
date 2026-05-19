@@ -274,11 +274,20 @@ function AdminDashboard({ token, onLogout }) {
           <StorySectionEditor storyDraft={storyDraft} setStoryDraft={setStoryDraft} onSave={saveStory} busy={busy} />
         </AdminSection>
 
-        <AdminSection title="Hero Slides" copy="Upload, delete, rename, and rearrange the images used in the top homepage slider.">
+        <AdminSection title="Hero Slides" copy="Upload, replace, delete, rename, and rearrange the images used in the top homepage slider.">
           <UploadPanel title="Add Slide" buttonText="Upload Slide" onUpload={(formData) => guarded(() => apiRequest('/api/slides', { method: 'POST', headers: authHeaders(token), body: formData }), 'Slide uploaded.')} />
           <div className="grid gap-4">
             {content.slides.map((slide, index) => (
-              <SlideAdminItem key={slide.id} slide={slide} index={index} total={content.slides.length} busy={busy} onMove={moveSlide} onRename={(title) => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders(token) }, body: JSON.stringify({ title }) }), 'Slide title saved.')} onDelete={() => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Slide deleted.')} />
+              <SlideAdminItem
+                key={slide.id}
+                slide={slide}
+                index={index}
+                total={content.slides.length}
+                busy={busy}
+                onMove={moveSlide}
+                onSave={(formData) => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'PATCH', headers: authHeaders(token), body: formData }), 'Slide saved.')}
+                onDelete={() => guarded(() => apiRequest(`/api/slides/${slide.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Slide deleted.')}
+              />
             ))}
           </div>
         </AdminSection>
@@ -287,7 +296,13 @@ function AdminDashboard({ token, onLogout }) {
           <UploadPanel title="Add Gallery Image" buttonText="Upload Gallery Image" includeCaption onUpload={(formData) => guarded(() => apiRequest('/api/gallery', { method: 'POST', headers: authHeaders(token), body: formData }), 'Gallery image uploaded.')} />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {content.gallery.map((item) => (
-              <GalleryAdminItem key={item.id} item={item} busy={busy} onSave={(draft) => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders(token) }, body: JSON.stringify(draft) }), 'Gallery text saved.')} onDelete={() => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Gallery image deleted.')} />
+              <GalleryAdminItem
+                key={item.id}
+                item={item}
+                busy={busy}
+                onSave={(formData) => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'PATCH', headers: authHeaders(token), body: formData }), 'Gallery image saved.')}
+                onDelete={() => guarded(() => apiRequest(`/api/gallery/${item.id}`, { method: 'DELETE', headers: authHeaders(token) }), 'Gallery image deleted.')}
+              />
             ))}
           </div>
         </AdminSection>
@@ -330,6 +345,19 @@ function cloneValue(value) {
 function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
   const setGroupField = (group, key, value) => {
     setDraft((current) => ({ ...current, [group]: { ...current[group], [key]: value } }));
+  };
+
+  const setSocialLink = (key, value) => {
+    setDraft((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        socialLinks: {
+          ...(current.footer.socialLinks || {}),
+          [key]: value,
+        },
+      },
+    }));
   };
 
   const setListItem = (listName, index, key, value) => {
@@ -497,6 +525,17 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
               Copyright
               <input className={fieldClass} value={draft.footer.copyright} onChange={(event) => setGroupField('footer', 'copyright', event.target.value)} />
             </label>
+            {[
+              ['facebook', 'Facebook link'],
+              ['twitter', 'Twitter / X link'],
+              ['instagram', 'Instagram link'],
+              ['linkedin', 'LinkedIn link'],
+            ].map(([key, label]) => (
+              <label className={labelClass} key={key}>
+                {label}
+                <input className={fieldClass} value={draft.footer.socialLinks?.[key] || ''} onChange={(event) => setSocialLink(key, event.target.value)} placeholder="https://..." />
+              </label>
+            ))}
           </div>
         </div>
 
@@ -782,16 +821,39 @@ function UploadPanel({ title, buttonText, includeCaption = false, onUpload }) {
   );
 }
 
-function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete }) {
+function SlideAdminItem({ slide, index, total, busy, onMove, onSave, onDelete }) {
   const [title, setTitle] = useState(slide.title);
+  const [imageFile, setImageFile] = useState(null);
+  const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : ''), [imageFile]);
+
+  useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
 
   useEffect(() => {
     setTitle(slide.title);
   }, [slide.title]);
 
+  useEffect(() => {
+    setImageFile(null);
+  }, [slide.image]);
+
+  const saveSlide = async () => {
+    const formData = new FormData();
+    formData.append('title', title);
+    if (imageFile) formData.append('image', imageFile);
+    const savedSlide = await onSave(formData);
+    if (savedSlide) setImageFile(null);
+  };
+
   return (
-    <article className="grid min-w-0 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-sm md:grid-cols-[210px_minmax(0,1fr)]">
-      <img className="aspect-[1.4] h-full w-full object-cover md:aspect-auto" src={slide.image} alt={slide.title} />
+    <article className="grid min-w-0 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-sm md:grid-cols-[230px_minmax(0,1fr)]">
+      <div className="grid gap-3 bg-[#FBFFF6] p-3">
+        <img className="aspect-[1.35] w-full rounded-lg object-cover" src={previewUrl || slide.image} alt={slide.title} />
+        <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+          <Upload size={20} />
+          <span className="min-w-0 truncate">{imageFile ? imageFile.name : 'Replace slide image'}</span>
+          <input className="hidden" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
+        </label>
+      </div>
       <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
           Slide title
@@ -800,7 +862,7 @@ function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete 
         <div className="flex flex-wrap items-center gap-3">
           <button className={iconButton} disabled={busy || index === 0} onClick={() => onMove(index, -1)} aria-label="Move slide up"><ArrowUp size={18} /></button>
           <button className={iconButton} disabled={busy || index === total - 1} onClick={() => onMove(index, 1)} aria-label="Move slide down"><ArrowDown size={18} /></button>
-          <button className={`${secondaryButton} flex-1 sm:flex-none`} disabled={busy} onClick={() => onRename(title)}>Save</button>
+          <button className={`${secondaryButton} flex-1 sm:flex-none`} disabled={busy} onClick={saveSlide}>Save Changes <Save size={18} /></button>
           <button className={`${iconButton} text-red-700`} disabled={busy || total <= 1} onClick={onDelete} aria-label="Delete slide"><Trash2 size={18} /></button>
         </div>
       </div>
@@ -810,14 +872,38 @@ function SlideAdminItem({ slide, index, total, busy, onMove, onRename, onDelete 
 
 function GalleryAdminItem({ item, busy, onSave, onDelete }) {
   const [draft, setDraft] = useState({ title: item.title, caption: item.caption || '' });
+  const [imageFile, setImageFile] = useState(null);
+  const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : ''), [imageFile]);
+
+  useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
 
   useEffect(() => {
     setDraft({ title: item.title, caption: item.caption || '' });
   }, [item.title, item.caption]);
 
+  useEffect(() => {
+    setImageFile(null);
+  }, [item.image]);
+
+  const saveGalleryItem = async () => {
+    const formData = new FormData();
+    formData.append('title', draft.title);
+    formData.append('caption', draft.caption);
+    if (imageFile) formData.append('image', imageFile);
+    const savedItem = await onSave(formData);
+    if (savedItem) setImageFile(null);
+  };
+
   return (
     <article className="min-w-0 overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-sm">
-      <img className="aspect-[1.25] w-full object-cover" src={item.image} alt={item.title} />
+      <div className="grid gap-3 bg-[#FBFFF6] p-3">
+        <img className="aspect-[1.25] w-full rounded-lg object-cover" src={previewUrl || item.image} alt={item.title} />
+        <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
+          <Upload size={20} />
+          <span className="min-w-0 truncate">{imageFile ? imageFile.name : 'Replace gallery image'}</span>
+          <input className="hidden" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
+        </label>
+      </div>
       <div className="grid min-w-0 gap-4 p-4">
         <label className={labelClass}>
           Title
@@ -828,7 +914,7 @@ function GalleryAdminItem({ item, busy, onSave, onDelete }) {
           <textarea className={`${fieldClass} min-h-24 resize-y`} value={draft.caption} onChange={(event) => setDraft({ ...draft, caption: event.target.value })} />
         </label>
         <div className="flex flex-wrap items-center gap-3">
-          <button className={`${secondaryButton} flex-1`} disabled={busy} onClick={() => onSave(draft)}>Save Text</button>
+          <button className={`${secondaryButton} flex-1`} disabled={busy} onClick={saveGalleryItem}>Save Changes <Save size={18} /></button>
           <button className={`${iconButton} text-red-700`} disabled={busy} onClick={onDelete} aria-label="Delete gallery image"><Trash2 size={18} /></button>
         </div>
       </div>

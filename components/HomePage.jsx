@@ -220,10 +220,11 @@ function Navbar({ navItems }) {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function HeroSection({ slides, hero, impactStats }) {
+function HeroSection({ slides, hero, impactStats, heroFeatures }) {
   const [active, setActive] = useState(0);
   const safeSlides = Array.isArray(slides) && slides.length ? slides : defaultContent.slides;
   const safeImpactStats = Array.isArray(impactStats) && impactStats.length ? impactStats : defaultContent.impactStats;
+  const safeHeroFeatures = Array.isArray(heroFeatures) && heroFeatures.length ? heroFeatures : defaultContent.heroFeatures;
   const heroBadge =
     safeImpactStats.find((stat) => stat.label?.toLowerCase().includes('year')) ||
     safeImpactStats.find((_, index) => index === 3) ||
@@ -265,14 +266,12 @@ function HeroSection({ slides, hero, impactStats }) {
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#52BD71]/30 bg-[#52BD71]/10 px-4 py-2">
               <Leaf className="h-3.5 w-3.5 text-[#52BD71]" />
               <span className="text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
-                Eco-Friendly Recycling
+                {hero.tagline}
               </span>
             </div>
 
             <h1 className="mb-6 text-[clamp(36px,5.5vw,70px)] font-extrabold leading-[1.08] tracking-tight text-white">
-              Building a{' '}
-              <span className="text-[#52BD71]">Sustainable</span>{' '}
-              Future Through Recycling
+              {hero.title}
             </h1>
 
             <p className="mb-8 max-w-lg text-[clamp(14px,1.6vw,18px)] leading-relaxed text-white/72">
@@ -296,32 +295,17 @@ function HeroSection({ slides, hero, impactStats }) {
               </a>
             </div>
 
-            {/* Trust row */}
-            <div className="mt-10 flex items-center gap-5">
-              <div className="flex -space-x-2.5">
-                {[
-                  { bg: '#52BD71', initials: 'JM' },
-                  { bg: '#0A5C36', initials: 'AA' },
-                  { bg: '#f3c623', initials: 'BK' },
-                  { bg: '#2f9e57', initials: 'SO' },
-                ].map(({ bg, initials }) => (
-                  <div
-                    key={initials}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white"
-                    style={{ background: bg }}
-                  >
-                    {initials}
+            {/* Feature row */}
+            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              {safeHeroFeatures.map((feature, i) => (
+                <div key={`${feature.title}-${i}`} className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur-sm">
+                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#52BD71]/18">
+                    <CheckCircle2 className="h-4 w-4 text-[#52BD71]" />
                   </div>
-                ))}
-              </div>
-              <div>
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-[#f3c623] text-[#f3c623]" />
-                  ))}
+                  <div className="text-sm font-bold text-white">{feature.title}</div>
+                  <div className="mt-1 text-xs leading-relaxed text-white/65">{feature.text}</div>
                 </div>
-                <span className="text-xs text-white/65">Trusted by 350+ partners</span>
-              </div>
+              ))}
             </div>
           </motion.div>
 
@@ -375,10 +359,26 @@ function HeroSection({ slides, hero, impactStats }) {
 const STAT_ICONS = [Recycle, Users, MapPin, Award];
 const STAT_COLORS = ['#0A5C36', '#52BD71', '#f3c623', '#0A5C36'];
 
-function StatsSection({ impactStats }) {
+function StatsSection({ impactStats, sections }) {
   return (
     <section className="bg-white py-14">
       <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="mb-12 text-center"
+        >
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            Impact
+          </div>
+          <h2 className="mb-4 text-[clamp(28px,3.5vw,46px)] font-extrabold text-[#153426]">
+            {sections.impactTitle}
+          </h2>
+          <div className="mx-auto h-1 w-14 rounded-full bg-[#52BD71]" />
+          {sections.impactCopy && <p className="mx-auto mt-5 max-w-xl text-[#5d7467]">{sections.impactCopy}</p>}
+        </motion.div>
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -421,7 +421,8 @@ const ABOUT_FEATURES = [
 ];
 
 function AboutSection({ story }) {
-  const { about } = story;
+  const { about, video } = story;
+  const hasStoryVideo = Boolean(video?.videoUrl);
   return (
     <section id="about" className="bg-[#F5F7F5] py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-5 md:px-10">
@@ -441,15 +442,15 @@ function AboutSection({ story }) {
                 className="h-[340px] w-full object-cover md:h-[460px]"
               />
             </div>
-            <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow-lg backdrop-blur-sm">
+            <a href="#story-video" className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow-lg backdrop-blur-sm">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0A5C36]">
                 <Play className="ml-0.5 h-4 w-4 text-white" />
               </div>
               <div>
-                <div className="text-xs font-bold text-[#153426]">Watch Our Story</div>
-                <div className="text-[10px] text-[#5d7467]">2 min video</div>
+                <div className="text-xs font-bold text-[#153426]">{video.title}</div>
+                <div className="text-[10px] text-[#5d7467]">{hasStoryVideo ? 'Watch video' : 'View story'}</div>
               </div>
-            </div>
+            </a>
           </motion.div>
 
           {/* Text */}
@@ -474,6 +475,19 @@ function AboutSection({ story }) {
 
           {/* Feature mini-cards */}
           <motion.div variants={fadeUp} className="flex flex-col justify-center gap-4">
+            <div id="story-video" className="overflow-hidden rounded-2xl bg-white shadow-sm">
+              {hasStoryVideo ? (
+                <video className="aspect-video w-full object-cover" controls poster={video.poster}>
+                  <source src={video.videoUrl} />
+                </video>
+              ) : (
+                <img className="aspect-video w-full object-cover" src={video.poster} alt={video.title} />
+              )}
+              <div className="p-5">
+                <div className="mb-1 font-bold text-[#153426]">{video.title}</div>
+                <p className="text-sm leading-relaxed text-[#5d7467]">{video.caption}</p>
+              </div>
+            </div>
             {ABOUT_FEATURES.map(({ icon: Icon, label }, i) => (
               <div
                 key={i}
@@ -536,19 +550,28 @@ function ServicesSection({ services, sections }) {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                className="group rounded-3xl border border-black/5 bg-[#F5F7F5] p-6 transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+                className="group overflow-hidden rounded-3xl border border-black/5 bg-[#F5F7F5] transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
               >
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#E8F5ED] transition duration-300 group-hover:bg-[#0A5C36]">
-                  <Icon className="h-6 w-6 text-[#0A5C36] transition duration-300 group-hover:text-white" />
+                <div className="relative">
+                  <img
+                    src={service.image || '/assets/recycling-plant.svg'}
+                    alt={service.name}
+                    className="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute bottom-4 left-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm transition duration-300 group-hover:bg-[#0A5C36]">
+                    <Icon className="h-5 w-5 text-[#0A5C36] transition duration-300 group-hover:text-white" />
+                  </div>
                 </div>
-                <h3 className="mb-3 text-[15px] font-bold text-[#153426]">{service.name}</h3>
-                <p className="mb-5 text-sm leading-relaxed text-[#5d7467]">{service.description}</p>
-                <a
-                  href="#contact"
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-[#0A5C36] transition duration-200 hover:gap-3"
-                >
-                  Learn More <ArrowRight className="h-4 w-4" />
-                </a>
+                <div className="p-6">
+                  <h3 className="mb-3 text-[15px] font-bold text-[#153426]">{service.name}</h3>
+                  <p className="mb-5 text-sm leading-relaxed text-[#5d7467]">{service.description}</p>
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[#0A5C36] transition duration-200 hover:gap-3"
+                  >
+                    Learn More <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
               </motion.div>
             );
           })}
@@ -620,6 +643,56 @@ function ProcessSection({ processSteps, sections }) {
 
 // ─── Gallery + Testimonials ───────────────────────────────────────────────────
 
+const WHY_ICONS = [ShieldCheck, MapPin, Leaf, CheckCircle2];
+
+function WhySection({ whyCards, sections }) {
+  const safeWhyCards = Array.isArray(whyCards) && whyCards.length ? whyCards : defaultContent.whyCards;
+
+  return (
+    <section className="bg-white py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-5 md:px-10">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="mb-14 text-center"
+        >
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-widest text-[#52BD71]">
+            Why Us
+          </div>
+          <h2 className="mb-4 text-[clamp(28px,3.5vw,46px)] font-extrabold text-[#153426]">
+            {sections.whyTitle}
+          </h2>
+          <div className="mx-auto h-1 w-14 rounded-full bg-[#52BD71]" />
+          {sections.whyCopy && <p className="mx-auto mt-5 max-w-xl text-[#5d7467]">{sections.whyCopy}</p>}
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VP}
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {safeWhyCards.map((card, i) => {
+            const Icon = WHY_ICONS[i % WHY_ICONS.length];
+            return (
+              <motion.div key={`${card.title}-${i}`} variants={fadeUp} className="rounded-2xl bg-[#F5F7F5] p-6">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F5ED]">
+                  <Icon className="h-5 w-5 text-[#0A5C36]" />
+                </div>
+                <h3 className="mb-3 font-bold text-[#153426]">{card.title}</h3>
+                <p className="text-sm leading-relaxed text-[#5d7467]">{card.text}</p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, testimonials }) {
   const [active, setActive] = useState(0);
   const [feedback, setFeedback] = useState({ name: '', role: '', text: '', rating: 5 });
@@ -671,6 +744,7 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
             <h2 className="text-[clamp(22px,2.5vw,36px)] font-extrabold text-[#153426]">
               {sections.galleryTitle}
             </h2>
+            {sections.galleryCopy && <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#5d7467]">{sections.galleryCopy}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {safeGalleryGrid.map((img, i) => (
@@ -786,6 +860,14 @@ function GalleryTestimonialsSection({ galleryGrid, onFeedbackAdded, sections, te
 function CtaBanner({ cta }) {
   return (
     <section className="relative overflow-hidden bg-[#0A5C36] py-20">
+      {cta.image && (
+        <img
+          src={cta.image}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-25"
+          aria-hidden="true"
+        />
+      )}
       <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/5" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#52BD71]/10" />
       <div className="pointer-events-none absolute right-1/4 top-4 h-32 w-32 rounded-full border border-white/8" />
@@ -1266,9 +1348,11 @@ export default function HomePage({ initialContent }) {
   const hero = content.hero || defaultContent.hero;
   const cta = content.cta || defaultContent.cta;
   const navItems = arrayWithFallback(content.navItems, defaultContent.navItems);
+  const heroFeatures = arrayWithFallback(content.heroFeatures, defaultContent.heroFeatures);
   const impactStats = arrayWithFallback(content.impactStats, defaultContent.impactStats);
   const services = arrayWithFallback(content.services, defaultContent.services);
   const processSteps = arrayWithFallback(content.processSteps, defaultContent.processSteps);
+  const whyCards = arrayWithFallback(content.whyCards, defaultContent.whyCards);
   const sections = content.sections || defaultContent.sections;
   const footer = content.footer || defaultContent.footer;
   const testimonials = arrayWithFallback(content.testimonials, defaultContent.testimonials);
@@ -1284,11 +1368,12 @@ export default function HomePage({ initialContent }) {
   return (
     <div className="min-h-screen">
       <Navbar navItems={navItems} />
-      <HeroSection slides={slides} hero={hero} impactStats={impactStats} />
-      <StatsSection impactStats={impactStats} />
+      <HeroSection slides={slides} hero={hero} impactStats={impactStats} heroFeatures={heroFeatures} />
+      <StatsSection impactStats={impactStats} sections={sections} />
       <AboutSection story={story} />
       <ServicesSection services={services} sections={sections} />
       <ProcessSection processSteps={processSteps} sections={sections} />
+      <WhySection whyCards={whyCards} sections={sections} />
       <GalleryTestimonialsSection
         galleryGrid={galleryGrid}
         sections={sections}
