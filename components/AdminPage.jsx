@@ -167,6 +167,15 @@ function AdminDashboard({ token, onLogout }) {
     'Website sections saved.',
   );
 
+  const saveWebsiteSectionsForm = (formData) => guarded(
+    () => apiRequest('/api/content', {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: formData,
+    }),
+    'Website sections saved.',
+  );
+
   const uploadMedia = async (file) => {
     if (!file) return '';
     setBusy(true);
@@ -267,7 +276,7 @@ function AdminDashboard({ token, onLogout }) {
         </AdminSection>
 
         <AdminSection title="Website Sections, Contact and Map" copy="Edit the remaining website text, cards, services, CTA, footer, phone, email, address, and Google Map location.">
-          <WebsiteSectionsEditor draft={siteDraft} setDraft={setSiteDraft} onSave={saveWebsiteSections} onUpload={uploadMedia} busy={busy} />
+          <WebsiteSectionsEditor draft={siteDraft} setDraft={setSiteDraft} onSave={saveWebsiteSections} onSaveForm={saveWebsiteSectionsForm} onUpload={uploadMedia} busy={busy} />
         </AdminSection>
 
         <AdminSection title="Story Sections" copy="Edit the large image and write-up section, plus the follow-our-story video area on the homepage.">
@@ -342,7 +351,7 @@ function cloneValue(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
+function WebsiteSectionsEditor({ draft, setDraft, onSave, onSaveForm, onUpload, busy }) {
   const [pendingServiceImages, setPendingServiceImages] = useState({});
   const [serviceImageStatus, setServiceImageStatus] = useState({});
 
@@ -391,32 +400,25 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
   };
 
   const saveSectionsWithServiceImages = async () => {
-    let nextDraft = draft;
     const pendingEntries = Object.entries(pendingServiceImages).filter(([, file]) => file);
 
-    for (const [indexKey, file] of pendingEntries) {
-      const index = Number(indexKey);
-      setServiceImageStatus((current) => ({ ...current, [index]: 'Uploading image...' }));
-      const url = await onUpload(file);
-      if (!url) {
-        setServiceImageStatus((current) => ({ ...current, [index]: 'Upload failed. Please choose a smaller image or try again.' }));
-        return;
+    if (pendingEntries.length) {
+      const formData = new FormData();
+      formData.append('content', JSON.stringify(draft));
+      for (const [indexKey, file] of pendingEntries) {
+        formData.append(`serviceImage-${indexKey}`, file);
+        setServiceImageStatus((current) => ({ ...current, [indexKey]: 'Uploading and saving image...' }));
       }
-      nextDraft = {
-        ...nextDraft,
-        services: nextDraft.services.map((service, serviceIndex) => (
-          serviceIndex === index ? { ...service, image: url } : service
-        )),
-      };
-      setServiceImageStatus((current) => ({ ...current, [index]: 'Uploaded. Saving service...' }));
+
+      const saved = await onSaveForm(formData);
+      if (saved) {
+        setPendingServiceImages({});
+        setServiceImageStatus({});
+      }
+      return;
     }
 
-    const saved = await onSave(nextDraft);
-    if (saved) {
-      setDraft(nextDraft);
-      setPendingServiceImages({});
-      setServiceImageStatus({});
-    }
+    await onSave(draft);
   };
 
   const useCurrentLocation = () => {
