@@ -158,11 +158,11 @@ function AdminDashboard({ token, onLogout }) {
     'Story sections saved.',
   );
 
-  const saveWebsiteSections = () => guarded(
+  const saveWebsiteSections = (nextDraft = siteDraft) => guarded(
     () => apiRequest('/api/content', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
-      body: JSON.stringify(siteDraft),
+      body: JSON.stringify(nextDraft),
     }),
     'Website sections saved.',
   );
@@ -343,6 +343,9 @@ function cloneValue(value) {
 }
 
 function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
+  const [pendingServiceImages, setPendingServiceImages] = useState({});
+  const [serviceImageStatus, setServiceImageStatus] = useState({});
+
   const setGroupField = (group, key, value) => {
     setDraft((current) => ({ ...current, [group]: { ...current[group], [key]: value } }));
   };
@@ -373,6 +376,47 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
 
   const removeListItem = (listName, index) => {
     setDraft((current) => ({ ...current, [listName]: current[listName].filter((_, itemIndex) => itemIndex !== index) }));
+    if (listName === 'services') {
+      setPendingServiceImages((current) => {
+        const next = { ...current };
+        delete next[index];
+        return next;
+      });
+      setServiceImageStatus((current) => {
+        const next = { ...current };
+        delete next[index];
+        return next;
+      });
+    }
+  };
+
+  const saveSectionsWithServiceImages = async () => {
+    let nextDraft = draft;
+    const pendingEntries = Object.entries(pendingServiceImages).filter(([, file]) => file);
+
+    for (const [indexKey, file] of pendingEntries) {
+      const index = Number(indexKey);
+      setServiceImageStatus((current) => ({ ...current, [index]: 'Uploading image...' }));
+      const url = await onUpload(file);
+      if (!url) {
+        setServiceImageStatus((current) => ({ ...current, [index]: 'Upload failed. Please choose a smaller image or try again.' }));
+        return;
+      }
+      nextDraft = {
+        ...nextDraft,
+        services: nextDraft.services.map((service, serviceIndex) => (
+          serviceIndex === index ? { ...service, image: url } : service
+        )),
+      };
+      setServiceImageStatus((current) => ({ ...current, [index]: 'Uploaded. Saving service...' }));
+    }
+
+    const saved = await onSave(nextDraft);
+    if (saved) {
+      setDraft(nextDraft);
+      setPendingServiceImages({});
+      setServiceImageStatus({});
+    }
   };
 
   const useCurrentLocation = () => {
@@ -452,11 +496,25 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         />
       </MiniPanel>
 
-      <MiniPanel title="Services and Service Images" onSave={onSave} busy={busy}>
+      <MiniPanel title="Services and Service Images" onSave={saveSectionsWithServiceImages} busy={busy}>
         <div className="grid gap-4">
           {draft.services.map((service, index) => (
             <div className="grid gap-4 rounded-lg border border-[#9DB36B]/30 bg-white p-4 md:grid-cols-[180px_minmax(0,1fr)_auto]" key={`${service.name}-${index}`}>
-              <MediaUploadField accept="image/*" busy={busy} label="Service image" onChange={(url) => setListItem('services', index, 'image', url)} onUpload={onUpload} value={service.image} />
+              <MediaUploadField
+                accept="image/*"
+                busy={busy}
+                label="Service image"
+                onFileChange={(file) => {
+                  setPendingServiceImages((current) => ({ ...current, [index]: file }));
+                  setServiceImageStatus((current) => ({
+                    ...current,
+                    [index]: file ? 'New image selected. Click Save to publish it.' : '',
+                  }));
+                }}
+                status={serviceImageStatus[index]}
+                uploadOnSelect={false}
+                value={service.image}
+              />
               <div className="grid gap-4 md:grid-cols-2">
                 <label className={labelClass}>
                   Service name
@@ -555,7 +613,7 @@ function WebsiteSectionsEditor({ draft, setDraft, onSave, onUpload, busy }) {
         <iframe className="mt-5 h-72 w-full rounded-lg border-0" title="Admin map preview" src={googleMapsEmbedForContact(draft.contact)} />
       </MiniPanel>
 
-      <button className={`${primaryButton} w-full sm:w-fit`} onClick={onSave} disabled={busy} type="button">
+      <button className={`${primaryButton} w-full sm:w-fit`} onClick={saveSectionsWithServiceImages} disabled={busy} type="button">
         Save Website Sections <Save size={18} />
       </button>
     </div>
@@ -605,11 +663,22 @@ function EditableList({ fields, items, listName, newItem, onAdd, onRemove, onUpd
   );
 }
 
-function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
+function MediaUploadField({
+  accept,
+  busy,
+  label,
+  onChange,
+  onFileChange,
+  onUpload,
+  status: externalStatus,
+  uploadOnSelect = true,
+  value,
+}) {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('');
   const inputRef = useRef(null);
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
+  const visibleStatus = externalStatus ?? status;
 
   useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
 
@@ -623,7 +692,7 @@ function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
     setStatus('Uploading...');
     const url = await onUpload(nextFile);
     if (url) {
-      onChange(url);
+      onChange?.(url);
       setFile(null);
       setStatus('Uploaded. Click Save to publish this image.');
     } else {
@@ -634,8 +703,11 @@ function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
   const chooseFile = async (event) => {
     const nextFile = event.target.files?.[0] || null;
     setFile(nextFile);
-    if (nextFile) {
+    onFileChange?.(nextFile);
+    if (uploadOnSelect && nextFile) {
       await upload(nextFile);
+    } else {
+      setStatus(nextFile ? 'New image selected. Click Save to publish it.' : '');
     }
   };
 
@@ -647,10 +719,12 @@ function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
         <span className="min-w-0 truncate">{file ? file.name : label}</span>
         <input ref={inputRef} className="hidden" type="file" accept={accept} onChange={chooseFile} />
       </label>
-      <button className={secondaryButton} onClick={upload} type="button" disabled={busy}>
-        {file ? 'Upload Media' : 'Choose Media'}
-      </button>
-      {status && <p className="text-sm font-black text-[#5A7C2E]">{status}</p>}
+      {uploadOnSelect && (
+        <button className={secondaryButton} onClick={upload} type="button" disabled={busy}>
+          {file ? 'Upload Media' : 'Select Media'}
+        </button>
+      )}
+      {visibleStatus && <p className="text-sm font-black text-[#5A7C2E]">{visibleStatus}</p>}
     </div>
   );
 }
