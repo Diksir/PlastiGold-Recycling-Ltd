@@ -607,21 +607,35 @@ function EditableList({ fields, items, listName, newItem, onAdd, onRemove, onUpd
 
 function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
   const [file, setFile] = useState(null);
+  const [status, setStatus] = useState('');
   const inputRef = useRef(null);
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file]);
 
   useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
 
-  const upload = async () => {
-    if (!file) {
+  const upload = async (nextFile = file) => {
+    setStatus('');
+    if (!nextFile) {
       inputRef.current?.click();
       return;
     }
 
-    const url = await onUpload(file);
+    setStatus('Uploading...');
+    const url = await onUpload(nextFile);
     if (url) {
       onChange(url);
       setFile(null);
+      setStatus('Uploaded. Click Save to publish this image.');
+    } else {
+      setStatus('Upload failed. Try again.');
+    }
+  };
+
+  const chooseFile = async (event) => {
+    const nextFile = event.target.files?.[0] || null;
+    setFile(nextFile);
+    if (nextFile) {
+      await upload(nextFile);
     }
   };
 
@@ -631,11 +645,12 @@ function MediaUploadField({ accept, busy, label, onChange, onUpload, value }) {
       <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-[#9DB36B]/60 bg-[#F3F9E9] px-4 py-3 font-black text-[#5A7C2E]">
         <Upload size={20} />
         <span className="min-w-0 truncate">{file ? file.name : label}</span>
-        <input ref={inputRef} className="hidden" type="file" accept={accept} onChange={(event) => setFile(event.target.files?.[0] || null)} />
+        <input ref={inputRef} className="hidden" type="file" accept={accept} onChange={chooseFile} />
       </label>
       <button className={secondaryButton} onClick={upload} type="button" disabled={busy}>
         {file ? 'Upload Media' : 'Choose Media'}
       </button>
+      {status && <p className="text-sm font-black text-[#5A7C2E]">{status}</p>}
     </div>
   );
 }
