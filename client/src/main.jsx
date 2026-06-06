@@ -151,7 +151,7 @@ function Navbar() {
   return (
     <header className="navbar">
       <a className="brand" href="#home" aria-label="PlastiGold Recycling Ltd home">
-        <img src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd logo" />
+        <img src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd logo" />
       </a>
       <button className="icon-button menu-button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu">
         {open ? <X size={22} /> : <Menu size={22} />}
@@ -369,7 +369,7 @@ function ContactLine({ icon, text }) {
 function Footer() {
   return (
     <footer className="footer">
-      <img src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+      <img src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd" />
       <p>www.plastigoldrecycling.com</p>
     </footer>
   );
@@ -426,7 +426,7 @@ function AdminLogin({ onLogin }) {
   return (
     <main className="admin-page">
       <section className="login-card">
-        <img src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+        <img src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd" />
         <h1>Admin Login</h1>
         <p>Sign in to update the homepage slides and gallery content.</p>
         <form onSubmit={submitLogin}>
@@ -508,7 +508,7 @@ function AdminDashboard({ token, onLogout }) {
       <section className="admin-shell">
         <div className="admin-header">
           <a className="brand" href="/">
-            <img src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+            <img src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd" />
           </a>
           <div className="admin-header-actions">
             <a className="button secondary" href="/">

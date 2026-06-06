@@ -72,7 +72,7 @@ function AdminLogin({ onLogin }) {
       <section className="mx-auto grid w-full max-w-md overflow-hidden rounded-lg border border-[#9DB36B]/30 bg-white shadow-2xl md:max-w-3xl lg:max-w-5xl lg:grid-cols-[0.9fr_1.1fr]">
         <div className="bg-[#E9F3D6] p-5 sm:p-7 lg:flex lg:flex-col lg:justify-between lg:p-8">
           <div>
-            <img className="h-16 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+            <img className="h-16 w-fit" src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd" />
             <h1 className="mt-5 text-3xl font-black text-[#5A7C2E] sm:text-4xl">Admin Login</h1>
           </div>
           <p className="mt-3 max-w-sm leading-7 text-brand-muted lg:mt-10">Sign in to update homepage slides and gallery content.</p>
@@ -219,7 +219,7 @@ function AdminDashboard({ token, onLogout }) {
       <section className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <a href="/">
-            <img className="h-14 w-fit" src="/assets/plastigold-logo.svg" alt="PlastiGold Recycling Ltd" />
+            <img className="h-14 w-fit" src="/assets/plastigold-logo.png" alt="PlastiGold Recycling Ltd" />
           </a>
           <div className="grid gap-3 sm:flex sm:items-center">
             <a className={secondaryButton} href="/">
