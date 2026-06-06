@@ -154,7 +154,7 @@ function Navbar({ navItems }) {
           {/* Logo */}
           <a href="#home" className="flex items-center" aria-label="PlastiGold Recycling Ltd home">
             <img
-              className="h-9 w-auto"
+              className="h-16 w-auto object-contain"
               src="/assets/plastigold-logo.png"
               alt="PlastiGold Recycling Ltd"
             />
@@ -1236,7 +1236,7 @@ function Footer({ footer, navItems, services, contact }) {
           <div>
             <a href="#home" className="mb-5 flex items-center" aria-label="PlastiGold Recycling Ltd home">
               <img
-                className="h-10 w-auto"
+                className="h-20 w-auto object-contain"
                 src="/assets/plastigold-logo.png"
                 alt="PlastiGold Recycling Ltd"
               />
