@@ -15,8 +15,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/assets/plastigold-logo.png',
-      badge: '/assets/plastigold-logo.png',
+      icon: '/assets/plastigold-logo-transparent.png',
+      badge: '/assets/plastigold-logo-transparent.png',
     }),
   );
 });
