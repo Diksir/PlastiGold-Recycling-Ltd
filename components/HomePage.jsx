@@ -503,7 +503,7 @@ function AboutSection({ story }) {
             ))}
             <div className="mt-1 rounded-2xl bg-[#0A5C36] p-5 text-white">
               <div className="mb-1 text-3xl font-extrabold">
-                10k<span className="text-[#52BD71]">+</span>
+                10,000<span className="text-[#52BD71]">+</span>
               </div>
               <div className="text-sm text-white/75">Tons of Plastic Recycled</div>
             </div>
