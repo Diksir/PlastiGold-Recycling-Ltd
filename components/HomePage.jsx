@@ -436,11 +436,22 @@ function AboutSection({ story }) {
           {/* Image */}
           <motion.div variants={fadeUp} className="relative">
             <div className="overflow-hidden rounded-3xl shadow-xl">
-              <img
-                src={about.image}
-                alt={about.title}
-                className="h-[340px] w-full object-cover md:h-[460px]"
-              />
+              {hasStoryVideo ? (
+                <video
+                  className="h-[340px] w-full object-cover md:h-[460px]"
+                  controls
+                  playsInline
+                  poster={video.poster}
+                >
+                  <source src={video.videoUrl} />
+                </video>
+              ) : (
+                <img
+                  src={about.image}
+                  alt={about.title}
+                  className="h-[340px] w-full object-cover md:h-[460px]"
+                />
+              )}
             </div>
             <a href="#story-video" className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow-lg backdrop-blur-sm">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0A5C36]">
