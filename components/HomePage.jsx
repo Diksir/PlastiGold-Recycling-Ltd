@@ -453,15 +453,6 @@ function AboutSection({ story }) {
                 />
               )}
             </div>
-            <a href="#story-video" className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white/92 px-4 py-3 shadow-lg backdrop-blur-sm">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0A5C36]">
-                <Play className="ml-0.5 h-4 w-4 text-white" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-[#153426]">{video.title}</div>
-                <div className="text-[10px] text-[#5d7467]">{hasStoryVideo ? 'Watch video' : 'View story'}</div>
-              </div>
-            </a>
           </motion.div>
 
           {/* Text */}
