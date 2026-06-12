@@ -997,7 +997,7 @@ function BlogSection() {
 function ContactSection({ contact, sections }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [status, setStatus] = useState('idle');
-  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean).join(', ');
+  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1020,12 +1020,6 @@ function ContactSection({ contact, sections }) {
       label: 'Our Address',
       value: contact.address,
       href: googleMapsUrlForContact(contact),
-    },
-    {
-      icon: Phone,
-      label: 'Phone',
-      value: callNumbers,
-      href: `tel:${contact.phone}`,
     },
     {
       icon: Mail,
@@ -1073,6 +1067,26 @@ function ContactSection({ contact, sections }) {
         >
           {/* Contact info */}
           <motion.div variants={fadeUp} className="flex flex-col gap-4">
+            <div className="flex items-start gap-4 rounded-2xl border border-black/5 p-5 transition hover:border-[#52BD71]/40 hover:shadow-sm">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E8F5ED]">
+                <Phone className="h-5 w-5 text-[#0A5C36]" />
+              </div>
+              <div>
+                <div className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-[#5d7467]">
+                  Phone
+                </div>
+                <div className="flex flex-wrap gap-x-2 gap-y-1 text-sm font-semibold text-[#153426]">
+                  {callNumbers.map((number, index) => (
+                    <span key={number} className="inline-flex">
+                      {index > 0 && <span className="mr-2 text-[#5d7467]">,</span>}
+                      <a href={`tel:${number}`} className="transition hover:text-[#0A5C36]">
+                        {number}
+                      </a>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
             {contactItems.map(({ icon: Icon, label, value, href }, i) => (
               <a
                 key={i}
@@ -1230,7 +1244,7 @@ const SOCIAL_LINKS = [
 
 function Footer({ footer, navItems, services, contact }) {
   const publicNavItems = publicNavigationItems(navItems);
-  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean).join(', ');
+  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean);
 
   return (
     <footer className="bg-[#021A0D] pb-8 pt-16 text-white">
@@ -1310,14 +1324,18 @@ function Footer({ footer, navItems, services, contact }) {
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#52BD71]" />
                 {contact.address}
               </li>
-              <li>
-                <a
-                  href={`tel:${contact.phone}`}
-                  className="flex items-center gap-2.5 text-sm text-white/55 transition hover:text-white"
-                >
-                  <Phone className="h-4 w-4 shrink-0 text-[#52BD71]" />
-                  {callNumbers}
-                </a>
+              <li className="flex items-start gap-2.5 text-sm text-white/55">
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#52BD71]" />
+                <span className="flex flex-wrap gap-x-1.5 gap-y-1">
+                  {callNumbers.map((number, index) => (
+                    <span key={number} className="inline-flex">
+                      {index > 0 && <span className="mr-1.5">,</span>}
+                      <a href={`tel:${number}`} className="transition hover:text-white">
+                        {number}
+                      </a>
+                    </span>
+                  ))}
+                </span>
               </li>
               <li>
                 <a
