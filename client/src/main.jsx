@@ -28,7 +28,7 @@ import './styles.css';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const mapQuery = encodeURIComponent('Sharada Industrial Area Phase 3, Opposite Aminci Radio, Kano Nigeria');
 const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-const whatsappUrl = 'https://wa.me/2348060990928';
+const whatsappUrl = 'https://wa.me/905342905894';
 const tokenKey = 'plastigold_admin_token';
 
 const defaultContent = {
@@ -329,7 +329,7 @@ function HomePage() {
           <div className="contact-panel reveal">
             <p className="eyebrow">Contact Us</p>
             <h2>Let's talk recycling.</h2>
-            <ContactLine icon={<Phone />} text="+234 806 099 0928, +234 906 495 05266" />
+            <ContactLine icon={<Phone />} text="+234 706 815 3313, +234 906 495 05266" />
             <ContactLine icon={<Mail />} text="yegroupholdings@gmail.com" />
             <ContactLine icon={<MapPin />} text="Sharada Industrial Area Phase 3, Opposite Aminci Radio, Kano, Nigeria" />
             <div className="contact-actions">
