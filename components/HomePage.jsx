@@ -997,6 +997,7 @@ function BlogSection() {
 function ContactSection({ contact, sections }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [status, setStatus] = useState('idle');
+  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean).join(', ');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1023,7 +1024,7 @@ function ContactSection({ contact, sections }) {
     {
       icon: Phone,
       label: 'Phone',
-      value: contact.phone,
+      value: callNumbers,
       href: `tel:${contact.phone}`,
     },
     {
@@ -1229,6 +1230,7 @@ const SOCIAL_LINKS = [
 
 function Footer({ footer, navItems, services, contact }) {
   const publicNavItems = publicNavigationItems(navItems);
+  const callNumbers = [contact.phone, contact.secondaryPhone].filter(Boolean).join(', ');
 
   return (
     <footer className="bg-[#021A0D] pb-8 pt-16 text-white">
@@ -1314,7 +1316,7 @@ function Footer({ footer, navItems, services, contact }) {
                   className="flex items-center gap-2.5 text-sm text-white/55 transition hover:text-white"
                 >
                   <Phone className="h-4 w-4 shrink-0 text-[#52BD71]" />
-                  {contact.phone}
+                  {callNumbers}
                 </a>
               </li>
               <li>

@@ -329,7 +329,7 @@ function HomePage() {
           <div className="contact-panel reveal">
             <p className="eyebrow">Contact Us</p>
             <h2>Let's talk recycling.</h2>
-            <ContactLine icon={<Phone />} text="+234 706 815 3313, +234 906 495 05266" />
+            <ContactLine icon={<Phone />} text="+234 806 099 0928, +234 706 815 3313" />
             <ContactLine icon={<Mail />} text="yegroupholdings@gmail.com" />
             <ContactLine icon={<MapPin />} text="Sharada Industrial Area Phase 3, Opposite Aminci Radio, Kano, Nigeria" />
             <div className="contact-actions">
